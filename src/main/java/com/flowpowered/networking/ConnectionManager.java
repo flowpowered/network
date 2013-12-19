@@ -1,0 +1,62 @@
+/*
+ * This file is part of Flow Networking, licensed under the MIT License (MIT).
+ *
+ * Copyright (c) 2013 Spout LLC <http://www.spout.org/>
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ */
+package com.flowpowered.networking;
+
+import io.netty.channel.Channel;
+import io.netty.util.AttributeKey;
+
+import com.flowpowered.networking.protocol.Protocol;
+import com.flowpowered.networking.session.Session;
+
+/**
+ * This class defines a basic structure for any object which manages connections.
+ * <br/>
+ * NOTE: it is imperative that any {@link Channel}s being bound or connected have the {@code PROTOCOL_ATTRIBUTE} applied to them
+ * by {@code Channel.attr(PROTOCOL_ATTRIBUTE).set(<PROTOCOL GOES HERE>);}.
+ */
+public abstract class ConnectionManager {
+    /**
+     * Creates a new Session for a {@code Channel}. This session will be used for all api-facing actions.
+     * Therefore, this session will most likely be saved by the {@code ConnectionManager} in order to intereact with the
+     * {@code Session}.
+     *
+     * @param c the Channel the Session will be using
+     * @param protocol the Protocol the Session will be using
+     * @return the new Session
+     */
+    public abstract Session newSession(Channel c, Protocol protocol);
+
+    /**
+     * Called when a session becomes inactive because the underlying channel has been closed.
+     * All references to the Session should be removed, as it will no longer be valid.
+     *
+     * @param session the Session which will become inactive
+     */
+    public abstract void sessionInactivated(Session session);
+
+    /**
+     * This attribute is used internally to store the protocol of a channel.
+     */
+    public static final AttributeKey<Protocol> PROTOCOL_ATTRIBUTE = new AttributeKey<>("PROTCOL");
+}
