@@ -57,7 +57,9 @@ public class MessageHandler extends SimpleChannelInboundHandler<Message> {
     @Override
     public void channelActive(ChannelHandlerContext ctx) {
         final Channel c = ctx.channel();
-        setSession(connectionManager.newSession(c));
+        Session s = connectionManager.newSession(c);
+        setSession(s);
+        s.onReady();
     }
 
     @Override

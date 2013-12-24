@@ -80,6 +80,12 @@ public interface Session {
     public void onDisconnect();
 
     /**
+     * Called once the Session is ready for messages.
+     *
+     */
+    public void onReady();
+
+    /**
      * Returns the address of this session.
      *
      * @return The remote address.

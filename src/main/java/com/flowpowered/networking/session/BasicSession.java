@@ -184,4 +184,8 @@ public class BasicSession implements Session {
     @Override
     public void onDisconnect() {
     }
+
+    @Override
+    public void onReady() {
+    }
 }
