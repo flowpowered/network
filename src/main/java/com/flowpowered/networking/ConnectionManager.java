@@ -29,11 +29,8 @@ import com.flowpowered.networking.session.Session;
 
 /**
  * This class defines a basic structure for any object which manages connections.
- * <br/>
- * NOTE: it is imperative that any {@link Channel}s being bound or connected have the {@code PROTOCOL_ATTRIBUTE} applied to them
- * by {@code Channel.attr(PROTOCOL_ATTRIBUTE).set(<PROTOCOL GOES HERE>);}.
  */
-public abstract class ConnectionManager {
+public interface ConnectionManager {
     /**
      * Creates a new Session for a {@code Channel}. This session will be used for all API-facing actions.
      * Therefore, this session will most likely be saved by the {@code ConnectionManager} in order to interact with the
@@ -42,7 +39,7 @@ public abstract class ConnectionManager {
      * @param c the Channel the Session will be using
      * @return the new Session
      */
-    public abstract Session newSession(Channel c);
+    Session newSession(Channel c);
 
     /**
      * Called when a session becomes inactive because the underlying channel has been closed.
@@ -50,5 +47,7 @@ public abstract class ConnectionManager {
      *
      * @param session the Session which will become inactive
      */
-    public abstract void sessionInactivated(Session session);
+    void sessionInactivated(Session session);
+
+    void shutdown();
 }

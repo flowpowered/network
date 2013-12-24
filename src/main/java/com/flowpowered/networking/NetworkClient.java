@@ -24,7 +24,6 @@
 package com.flowpowered.networking;
 
 import io.netty.bootstrap.Bootstrap;
-import io.netty.channel.Channel;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioSocketChannel;
@@ -34,7 +33,7 @@ import java.net.SocketAddress;
 /**
  * This class defines an easy, general way to start a client. It is recommended that any clients use or extend this class.
  */
-public abstract class NetworkClient extends ConnectionManager {
+public abstract class NetworkClient implements ConnectionManager {
     private final Bootstrap bootstrap = new Bootstrap();
     private final EventLoopGroup workerGroup = new NioEventLoopGroup();
 
@@ -44,6 +43,11 @@ public abstract class NetworkClient extends ConnectionManager {
             .channel(NioSocketChannel.class)
             .handler(new BasicChannelInitializer(this));
 
-        Channel channel = bootstrap.connect(remoteAdress).awaitUninterruptibly().channel();
+        bootstrap.connect(remoteAdress);
+    }
+
+    @Override
+    public void shutdown() {
+        workerGroup.shutdownGracefully();
     }
 }

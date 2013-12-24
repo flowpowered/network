@@ -35,7 +35,7 @@ import java.net.SocketAddress;
 /**
  * This class defines an easy, general way to start a server. It is recommended that any server use or extend this class.
  */
-public abstract class NetworkServer extends ConnectionManager {
+public abstract class NetworkServer implements ConnectionManager {
     /**
      * The {@link ServerBootstrap} used to initialize Netty.
      */
@@ -54,5 +54,11 @@ public abstract class NetworkServer extends ConnectionManager {
 
     public void bind(SocketAddress address) {
         Channel channel = bootstrap.bind(address).awaitUninterruptibly().channel();
+    }
+
+    @Override
+    public void shutdown() {
+        workerGroup.shutdownGracefully();
+        bossGroup.shutdownGracefully();
     }
 }
