@@ -85,7 +85,7 @@ public abstract class Protocol implements Named {
     public <M extends Message, C extends Codec<M>, H extends MessageHandler<M>> C registerMessage(Class<C> codec, Class<H> handler) {
         try {
             C bind = codecLookup.bind(codec);
-            if (bind != null) {
+            if (bind != null && handler != null) {
                 handlerLookup.bind(bind.getMessage(), handler);
             }
             return bind;
@@ -100,6 +100,7 @@ public abstract class Protocol implements Named {
      *
      * @return the name
      */
+    @Override
     public String getName() {
         return name;
     }
