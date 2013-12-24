@@ -32,8 +32,6 @@ import io.netty.channel.socket.nio.NioServerSocketChannel;
 
 import java.net.SocketAddress;
 
-import com.flowpowered.networking.protocol.Protocol;
-
 /**
  * This class defines an easy, general way to start a server. It is recommended that any server use or extend this class.
  */
@@ -54,8 +52,7 @@ public abstract class NetworkServer extends ConnectionManager {
             .childOption(ChannelOption.SO_KEEPALIVE, true);
     }
 
-    public void bind(SocketAddress address, Protocol protocol) {
+    public void bind(SocketAddress address) {
         Channel channel = bootstrap.bind(address).awaitUninterruptibly().channel();
-        channel.attr(PROTOCOL_ATTRIBUTE).set(protocol);
     }
 }

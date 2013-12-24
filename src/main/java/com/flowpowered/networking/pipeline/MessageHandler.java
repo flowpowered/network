@@ -49,7 +49,6 @@ public class MessageHandler extends SimpleChannelInboundHandler<Message> {
 
     /**
      * Creates a new network event handler.
-     *
      */
     public MessageHandler(ConnectionManager connectionManager) {
         this.connectionManager = connectionManager;
@@ -58,7 +57,7 @@ public class MessageHandler extends SimpleChannelInboundHandler<Message> {
     @Override
     public void channelActive(ChannelHandlerContext ctx) {
         final Channel c = ctx.channel();
-        setSession(connectionManager.newSession(c, c.attr(ConnectionManager.PROTOCOL_ATTRIBUTE).get()));
+        setSession(connectionManager.newSession(c));
     }
 
     @Override

@@ -53,7 +53,7 @@ public class BasicSession implements Session {
     /**
      * The protocol for this session
      */
-    private final Protocol protocol;
+    private Protocol protocol;
     /**
      * Default uncaught exception handler
      */
@@ -140,6 +140,10 @@ public class BasicSession implements Session {
     @Override
     public Protocol getProtocol() {
         return this.protocol;
+    }
+
+    protected void setProtocol(Protocol protocol) {
+        this.protocol = protocol;
     }
 
     @Override

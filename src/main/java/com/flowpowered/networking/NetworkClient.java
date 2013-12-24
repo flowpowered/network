@@ -31,10 +31,6 @@ import io.netty.channel.socket.nio.NioSocketChannel;
 
 import java.net.SocketAddress;
 
-import static com.flowpowered.networking.ConnectionManager.PROTOCOL_ATTRIBUTE;
-
-import com.flowpowered.networking.protocol.Protocol;
-
 /**
  * This class defines an easy, general way to start a client. It is recommended that any clients use or extend this class.
  */
@@ -42,13 +38,12 @@ public abstract class NetworkClient extends ConnectionManager {
     private final Bootstrap bootstrap = new Bootstrap();
     private final EventLoopGroup workerGroup = new NioEventLoopGroup();
 
-    public NetworkClient(final SocketAddress remoteAdress, final Protocol toConnect) {
+    public NetworkClient(final SocketAddress remoteAdress) {
         bootstrap
             .group(workerGroup)
             .channel(NioSocketChannel.class)
             .handler(new BasicChannelInitializer(this));
 
         Channel channel = bootstrap.connect(remoteAdress).awaitUninterruptibly().channel();
-        channel.attr(PROTOCOL_ATTRIBUTE).set(toConnect);
     }
 }

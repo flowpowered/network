@@ -29,7 +29,6 @@ import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 
 import com.flowpowered.networking.Codec;
-import com.flowpowered.networking.ConnectionManager;
 import com.flowpowered.networking.Message;
 import com.flowpowered.networking.process.PreprocessReplayingDecoder;
 import com.flowpowered.networking.protocol.Protocol;
@@ -40,16 +39,18 @@ import com.flowpowered.networking.exception.UnknownPacketException;
  */
 public class MessageDecoder extends PreprocessReplayingDecoder {
     private static final int PREVIOUS_MASK = 0x1F;
+    private final MessageHandler messageHandler;
     private int[] previousOpcodes = new int[PREVIOUS_MASK + 1];
     private int opcodeCounter = 0;
 
-    public MessageDecoder() {
+    public MessageDecoder(final MessageHandler handler) {
         super(512);
+        this.messageHandler = handler;
     }
 
     @Override
     protected Object decodeProcessed(ChannelHandlerContext ctx, ByteBuf buf) throws Exception {
-        Protocol protocol = ctx.channel().parent().attr(ConnectionManager.PROTOCOL_ATTRIBUTE).get();
+        Protocol protocol = messageHandler.getSession().getProtocol();
         Codec<?> codec = null;
         try {
             codec = protocol.readHeader(buf);

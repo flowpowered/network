@@ -23,12 +23,11 @@
  */
 package com.flowpowered.networking.protocol;
 
+import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.concurrent.ConcurrentHashMap;
-
-import com.flowpowered.networking.protocol.Protocol;
 
 /**
  * This class provides a way to store Protocols by name and {@link SocketAddress}.
@@ -36,16 +35,16 @@ import com.flowpowered.networking.protocol.Protocol;
  */
 public class ProtocolRegistry {
     private final ConcurrentHashMap<String, Protocol> names = new ConcurrentHashMap<>();
-    private final ConcurrentHashMap<SocketAddress, Protocol> sockets = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<Integer, Protocol> sockets = new ConcurrentHashMap<>();
 
     /**
      * Registers a Protocol under its name
      *
      * @param protocol the Protocol
      */
-    public void registerProtocol(SocketAddress adress, Protocol protocol) {
+    public void registerProtocol(int port, Protocol protocol) {
         this.names.put(protocol.getName(), protocol);
-        this.sockets.put(adress, protocol);
+        this.sockets.put(port, protocol);
     }
 
     /**
@@ -59,13 +58,16 @@ public class ProtocolRegistry {
     }
 
     /**
-     * Gets the Protocol associated with a particular address
+     * Gets the Protocol associated with a particular {@code SocketAddress}, checking by port if possible.
      *
      * @param address the address
      * @return the Protocol
      */
     public Protocol getProtocol(SocketAddress address) {
-        return this.sockets.get(address);
+        if (address instanceof InetSocketAddress) {
+            return this.sockets.get(((InetSocketAddress) address).getPort());
+        }
+        return null;
     }
 
     /**

@@ -24,9 +24,7 @@
 package com.flowpowered.networking;
 
 import io.netty.channel.Channel;
-import io.netty.util.AttributeKey;
 
-import com.flowpowered.networking.protocol.Protocol;
 import com.flowpowered.networking.session.Session;
 
 /**
@@ -37,15 +35,14 @@ import com.flowpowered.networking.session.Session;
  */
 public abstract class ConnectionManager {
     /**
-     * Creates a new Session for a {@code Channel}. This session will be used for all api-facing actions.
-     * Therefore, this session will most likely be saved by the {@code ConnectionManager} in order to intereact with the
+     * Creates a new Session for a {@code Channel}. This session will be used for all API-facing actions.
+     * Therefore, this session will most likely be saved by the {@code ConnectionManager} in order to interact with the
      * {@code Session}.
      *
      * @param c the Channel the Session will be using
-     * @param protocol the Protocol the Session will be using
      * @return the new Session
      */
-    public abstract Session newSession(Channel c, Protocol protocol);
+    public abstract Session newSession(Channel c);
 
     /**
      * Called when a session becomes inactive because the underlying channel has been closed.
@@ -54,9 +51,4 @@ public abstract class ConnectionManager {
      * @param session the Session which will become inactive
      */
     public abstract void sessionInactivated(Session session);
-
-    /**
-     * This attribute is used internally to store the protocol of a channel.
-     */
-    public static final AttributeKey<Protocol> PROTOCOL_ATTRIBUTE = new AttributeKey<>("PROTCOL");
 }

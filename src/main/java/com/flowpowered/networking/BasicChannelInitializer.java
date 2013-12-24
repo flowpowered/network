@@ -42,14 +42,11 @@ public class BasicChannelInitializer extends ChannelInitializer<SocketChannel> {
 
     @Override
     protected final void initChannel(SocketChannel c) {
-        if (c.parent() != null) {
-            c.attr(ConnectionManager.PROTOCOL_ATTRIBUTE).set(c.parent().attr(ConnectionManager.PROTOCOL_ATTRIBUTE).get());
-        }
-        // Up for encoding/sending/outbound; Down for decoding/receiving/inbound
-        MessageEncoder encoder = new MessageEncoder();
-        MessageDecoder decoder = new MessageDecoder();
         MessageHandler handler = new MessageHandler(connectionManager);
+        MessageEncoder encoder = new MessageEncoder(handler);
+        MessageDecoder decoder = new MessageDecoder(handler);
 
+        // Left to right for encoding/sending/outbound; Right to left for decoding/receiving/inbound
         c.pipeline().addLast(decoder, encoder, handler);
     }
 }

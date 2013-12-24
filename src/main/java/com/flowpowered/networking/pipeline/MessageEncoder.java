@@ -23,29 +23,33 @@
  */
 package com.flowpowered.networking.pipeline;
 
-import com.flowpowered.networking.protocol.Protocol;
-import com.flowpowered.networking.Message;
 import com.flowpowered.networking.Codec;
-import java.io.IOException;
-import java.util.List;
+import com.flowpowered.networking.Message;
+import com.flowpowered.networking.process.ProcessingEncoder;
+import com.flowpowered.networking.protocol.Protocol;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelHandlerContext;
-import com.flowpowered.networking.ConnectionManager;
 
-import com.flowpowered.networking.process.ProcessingEncoder;
+import java.io.IOException;
+import java.util.List;
 
 /**
  * A {@link MessageToMessageEncoder} which encodes into {@link ByteBuf}s.
  */
 public class MessageEncoder extends ProcessingEncoder {
+    private final MessageHandler messageHandler;
+
+    public MessageEncoder(final MessageHandler messageHandler) {
+        this.messageHandler = messageHandler;
+    }
 
     @SuppressWarnings("unchecked")
     @Override
     protected void encodePreProcess(ChannelHandlerContext ctx, final Object msg, List<Object> out) throws IOException {
         if (msg instanceof Message) {
-            final Protocol protocol = ctx.channel().attr(ConnectionManager.PROTOCOL_ATTRIBUTE).get();
+            final Protocol protocol = messageHandler.getSession().getProtocol();
             final Message message = (Message) msg;
             final Class<? extends Message> clazz = message.getClass();
             final Codec<Message> codec = (Codec<Message>) protocol.getCodecLookupService().find(clazz);
