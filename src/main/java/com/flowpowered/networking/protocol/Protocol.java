@@ -55,6 +55,12 @@ public abstract class Protocol implements Named {
         this(name, defaultPort, maxPackets, LogManager.getLogger("Protocol." + name));
     }
 
+    /**
+     * @param name
+     * @param defaultPort
+     * @param maxPackets this is one more than the maximum packet id
+     * @param logger 
+     */
     public Protocol(String name, int defaultPort, int maxPackets, Logger logger) {
         this.name = name;
         StringToUniqueIntegerMap dynamicPacketLookup = new StringToUniqueIntegerMap(null, new MemoryStore<Integer>(), maxPackets, maxPackets, this.name + "ProtocolDynamicPackets");

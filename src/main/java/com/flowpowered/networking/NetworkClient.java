@@ -27,6 +27,8 @@ import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioSocketChannel;
+import io.netty.util.concurrent.Future;
+import io.netty.util.concurrent.GenericFutureListener;
 
 import java.net.SocketAddress;
 
@@ -37,13 +39,26 @@ public abstract class NetworkClient implements ConnectionManager {
     private final Bootstrap bootstrap = new Bootstrap();
     private final EventLoopGroup workerGroup = new NioEventLoopGroup();
 
-    public NetworkClient(final SocketAddress remoteAdress) {
+    public NetworkClient() {
         bootstrap
             .group(workerGroup)
             .channel(NioSocketChannel.class)
             .handler(new BasicChannelInitializer(this));
+    }
 
-        bootstrap.connect(remoteAdress);
+    public Future<Void> connect(final SocketAddress remoteAdress) {
+        return bootstrap.connect(remoteAdress).addListener(new GenericFutureListener<Future<? super Void>>() {
+            @Override
+            public void operationComplete(Future<? super Void> f) throws Exception {
+                Throwable cause = f.cause();
+                if (cause != null || f.isCancelled()) {
+                    onConnectFailure();
+                }
+            }
+        });
+    }
+
+    public void onConnectFailure() {
     }
 
     @Override
