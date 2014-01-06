@@ -27,8 +27,6 @@ import java.net.InetSocketAddress;
 
 import io.netty.channel.Channel;
 
-import org.apache.logging.log4j.Level;
-
 import com.flowpowered.networking.Message;
 import com.flowpowered.networking.MessageHandler;
 import com.flowpowered.networking.protocol.Protocol;
@@ -150,7 +148,8 @@ public interface Session {
 
         @Override
         public void uncaughtException(Message message, MessageHandler<?> handle, Exception ex) {
-            session.getProtocol().getLogger().log(Level.ERROR, "Message handler for " + message.getClass().getSimpleName() + " threw exception", ex);
+            session.getProtocol().getLogger().error("Message handler for " + message.getClass().getSimpleName() + " threw exception", ex); // TODO: Use parametrized message instead of string
+                                                                                                                                           // concatation.
             //session.disconnect("Message handler exception for " + message.getClass().getSimpleName());
             session.disconnect();
         }

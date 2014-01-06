@@ -29,9 +29,8 @@ import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 
-import org.apache.logging.log4j.Level;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.flowpowered.networking.ConnectionManager;
 import com.flowpowered.networking.Message;
@@ -83,7 +82,7 @@ public class MessageHandler extends SimpleChannelInboundHandler<Message> {
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
         Channel c = ctx.channel();
-        getLogger().log(Level.WARN, "Exception caught, closing channel: " + c + "...", cause);
+        getLogger().warn("Exception caught, closing channel: " + c + "...", cause); //TODO: Use parametrized message instead of string concatation.
         c.close();
     }
 
@@ -104,6 +103,6 @@ public class MessageHandler extends SimpleChannelInboundHandler<Message> {
             // TODO: Maybe we should just use the protocolLogger if present?
             loggerName = protocolLogger != null ? protocolLogger.getName() + "." : "";
         }
-        return LogManager.getLogger(loggerName + getClass().getSimpleName());
+        return LoggerFactory.getLogger(loggerName + getClass().getSimpleName());
     }
 }

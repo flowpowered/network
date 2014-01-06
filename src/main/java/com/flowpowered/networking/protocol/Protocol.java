@@ -28,9 +28,8 @@ import java.lang.reflect.InvocationTargetException;
 
 import io.netty.buffer.ByteBuf;
 
-import org.apache.logging.log4j.Level;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.flowpowered.commons.Named;
 import com.flowpowered.commons.StringToUniqueIntegerMap;
@@ -52,14 +51,14 @@ public abstract class Protocol implements Named {
     private final Logger logger;
 
     public Protocol(String name, int defaultPort, int maxPackets) {
-        this(name, defaultPort, maxPackets, LogManager.getLogger("Protocol." + name));
+        this(name, defaultPort, maxPackets, LoggerFactory.getLogger("Protocol." + name));
     }
 
     /**
      * @param name
      * @param defaultPort
      * @param maxPackets this is one more than the maximum packet id
-     * @param logger 
+     * @param logger
      */
     public Protocol(String name, int defaultPort, int maxPackets, Logger logger) {
         this.name = name;
@@ -96,7 +95,7 @@ public abstract class Protocol implements Named {
             }
             return bind;
         } catch (InstantiationException | IllegalAccessException | InvocationTargetException e) {
-            logger.log(Level.ERROR, "Error registering codec " + codec + ": ", e);
+            logger.error("Error registering codec " + codec + ": ", e);  // TODO: Use parametrized message instead of string concatation.
             return null;
         }
     }
