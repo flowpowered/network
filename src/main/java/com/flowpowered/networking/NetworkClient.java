@@ -23,14 +23,17 @@
  */
 package com.flowpowered.networking;
 
+import java.net.SocketAddress;
+import java.util.Map;
+import java.util.Map.Entry;
+
 import io.netty.bootstrap.Bootstrap;
+import io.netty.channel.ChannelOption;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.util.concurrent.Future;
 import io.netty.util.concurrent.GenericFutureListener;
-
-import java.net.SocketAddress;
 
 /**
  * This class defines an easy, general way to start a client. It is recommended that any clients use or extend this class.
@@ -56,6 +59,16 @@ public abstract class NetworkClient implements ConnectionManager {
                 }
             }
         });
+    }
+
+    /**
+     * Sets an {@link ChannelOption} to apply prior to connecting. After a connection has been established, this method is useless; an Exception *may* be thrown on it's use.
+     * @param <T>
+     * @param option
+     * @param value
+     */
+    public <T> void preConnectOption(ChannelOption<T> option, T value) {
+        bootstrap.option(option, value);
     }
 
     public void onConnectFailure() {

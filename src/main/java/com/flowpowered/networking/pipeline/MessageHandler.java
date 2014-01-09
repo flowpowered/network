@@ -81,9 +81,7 @@ public class MessageHandler extends SimpleChannelInboundHandler<Message> {
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
-        Channel c = ctx.channel();
-        getLogger().warn("Exception caught, closing channel: " + c + "...", cause); //TODO: Use parametrized message instead of string concatation.
-        c.close();
+        session.get().onThrowable(cause);
     }
 
     public Session getSession() {

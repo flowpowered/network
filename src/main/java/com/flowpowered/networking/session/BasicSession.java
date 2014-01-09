@@ -33,6 +33,7 @@ import io.netty.channel.Channel;
 import com.flowpowered.networking.Message;
 import com.flowpowered.networking.MessageHandler;
 import com.flowpowered.networking.protocol.Protocol;
+import io.netty.channel.ChannelOption;
 
 /**
  * A basic implementation of a {@link Session} which handles and sends messages instantly.
@@ -158,18 +159,27 @@ public class BasicSession implements Session {
         }
     }
 
-    @Override
+    /**
+     * Gets the uncaught exception handler.
+     *
+     * <p>Note: the default exception handler is the {@link DefaultUncaughtExceptionHandler}.</p>
+     *
+     * @return exception handler
+     */
     public UncaughtExceptionHandler getUncaughtExceptionHandler() {
         return exceptionHandler.get();
     }
 
-    @Override
+    /**
+     * Sets the uncaught exception handler to be used for this session. Null values are not permitted.
+     *
+     * <p>Note: to reset the default exception handler, use the{@link DefaultUncaughtExceptionHandler}.</p>
+     */
     public void setUncaughtExceptionHandler(UncaughtExceptionHandler handler) {
-        if (handler != null) {
-            exceptionHandler.set(handler);
-        } else {
+        if (handler == null) {
             throw new IllegalArgumentException("Null uncaught exception handlers are not permitted");
         }
+        exceptionHandler.set(handler);
     }
 
     public Channel getChannel() {
@@ -187,5 +197,40 @@ public class BasicSession implements Session {
 
     @Override
     public void onReady() {
+    }
+
+    @Override
+    public void onThrowable(Throwable throwable) {
+    }
+
+    public <T> void setOption(ChannelOption<T> option, T value) {
+        channel.config().setOption(option, value);
+    }
+
+    public interface UncaughtExceptionHandler {
+        /**
+         * Called when an exception occurs during session handling
+         *
+         * @param message the message handler threw an exception on
+         * @param handle handler that threw the an exception handling the message
+         * @param ex the exception
+         */
+        public void uncaughtException(Message message, MessageHandler<?> handle, Exception ex);
+    }
+
+    public static final class DefaultUncaughtExceptionHandler implements UncaughtExceptionHandler {
+        private final Session session;
+
+        public DefaultUncaughtExceptionHandler(Session session) {
+            this.session = session;
+        }
+
+        @Override
+        public void uncaughtException(Message message, MessageHandler<?> handle, Exception ex) {
+            session.getProtocol().getLogger().error("Message handler for " + message.getClass().getSimpleName() + " threw exception", ex); // TODO: Use parametrized message instead of string
+                                                                                                                                           // concatation.
+            //session.disconnect("Message handler exception for " + message.getClass().getSimpleName());
+            session.disconnect();
+        }
     }
 }

@@ -28,7 +28,6 @@ import java.net.InetSocketAddress;
 import io.netty.channel.Channel;
 
 import com.flowpowered.networking.Message;
-import com.flowpowered.networking.MessageHandler;
 import com.flowpowered.networking.protocol.Protocol;
 
 /**
@@ -84,6 +83,13 @@ public interface Session {
     public void onReady();
 
     /**
+     * Called when a throwable is thrown in the pipeline.
+     *
+     * @param throwable 
+     */
+    public void onThrowable(Throwable throwable);
+
+    /**
      * Returns the address of this session.
      *
      * @return The remote address.
@@ -111,47 +117,4 @@ public interface Session {
      * @return is active
      */
     public boolean isActive();
-
-    public interface UncaughtExceptionHandler {
-        /**
-         * Called when an exception occurs during session handling
-         *
-         * @param message the message handler threw an exception on
-         * @param handle handler that threw the an exception handling the message
-         * @param ex the exception
-         */
-        public void uncaughtException(Message message, MessageHandler<?> handle, Exception ex);
-    }
-
-    /**
-     * Gets the uncaught exception handler.
-     *
-     * <p>Note: the default exception handler is the {@link DefaultUncaughtExceptionHandler}.</p>
-     *
-     * @return exception handler
-     */
-    public UncaughtExceptionHandler getUncaughtExceptionHandler();
-
-    /**
-     * Sets the uncaught exception handler to be used for this session. Null values are not permitted.
-     *
-     * <p>Note: to reset the default exception handler, use the{@link DefaultUncaughtExceptionHandler}.</p>
-     */
-    public void setUncaughtExceptionHandler(UncaughtExceptionHandler handler);
-
-    public static final class DefaultUncaughtExceptionHandler implements UncaughtExceptionHandler {
-        private final Session session;
-
-        public DefaultUncaughtExceptionHandler(Session session) {
-            this.session = session;
-        }
-
-        @Override
-        public void uncaughtException(Message message, MessageHandler<?> handle, Exception ex) {
-            session.getProtocol().getLogger().error("Message handler for " + message.getClass().getSimpleName() + " threw exception", ex); // TODO: Use parametrized message instead of string
-                                                                                                                                           // concatation.
-            //session.disconnect("Message handler exception for " + message.getClass().getSimpleName());
-            session.disconnect();
-        }
-    }
 }
