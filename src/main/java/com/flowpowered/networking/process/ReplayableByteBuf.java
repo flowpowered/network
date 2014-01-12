@@ -748,7 +748,8 @@ public class ReplayableByteBuf extends ByteBuf {
 
     @Override
     public boolean readBoolean() {
-        return unsupported();
+        checkAvail(1);
+        return buffer.readBoolean();
     }
 
     @Override
