@@ -34,6 +34,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import com.flowpowered.commons.StringToUniqueIntegerMap;
 import com.flowpowered.networking.Codec;
 import com.flowpowered.networking.Message;
+import com.flowpowered.networking.exception.IllegalOpcodeException;
 
 /**
  * A class used to lookup message codecs.
@@ -124,7 +125,7 @@ public class CodecLookupService {
      */
     public Codec<? extends Message> find(int opcode) {
         if (opcode < 0 || opcode >= opcodeTable.length) {
-            throw new IllegalArgumentException("Opcode " + opcode + " is out of bounds");
+            throw new IllegalOpcodeException("Opcode " + opcode + " is out of bounds");
         }
         return opcodeTable[opcode];
     }
