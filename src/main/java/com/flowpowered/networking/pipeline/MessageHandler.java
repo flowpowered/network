@@ -97,7 +97,7 @@ public class MessageHandler extends SimpleChannelInboundHandler<Message> {
     protected Logger getLogger() {
         String loggerName = "";
         if (session.get() != null) {
-            Logger protocolLogger = session.get().getProtocol().getLogger();
+            Logger protocolLogger = session.get().getLogger();
             // TODO: Maybe we should just use the protocolLogger if present?
             loggerName = protocolLogger != null ? protocolLogger.getName() + "." : "";
         }

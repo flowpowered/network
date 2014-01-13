@@ -23,12 +23,10 @@
  */
 package com.flowpowered.networking.exception;
 
-import java.io.IOException;
-
 /**
- * Thrown when a {@link com.flowpowered.networking.Codec} cannot be found for a given opcode
+ * Thrown when a {@link com.flowpowered.networking.Codec} cannot be found for a given opcode and key.
  */
-public class UnknownPacketException extends IOException {
+public class UnknownPacketException extends Exception {
     private static final long serialVersionUID = 2479966238464122702L;
     private final int opcode;
     /**
@@ -37,12 +35,10 @@ public class UnknownPacketException extends IOException {
     private final int length;
 
     /**
-     *
      * @param opcode the opcode of the unknown packet
-     * @param length the length of the unknown packet, or -1 if unknown
      */
-    public UnknownPacketException(int opcode, int length) {
-        super("Unknown opcode: " + opcode);
+    public UnknownPacketException(String message, int opcode, int length) {
+        super(message);
         this.opcode = opcode;
         this.length = length;
     }

@@ -23,7 +23,7 @@
  */
 package com.flowpowered.networking.exception;
 
-public class IllegalOpcodeException extends RuntimeException {
+public class IllegalOpcodeException extends Exception {
 
     public IllegalOpcodeException() {
     }

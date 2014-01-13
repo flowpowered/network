@@ -29,6 +29,8 @@ import io.netty.channel.Channel;
 
 import com.flowpowered.networking.Message;
 import com.flowpowered.networking.protocol.Protocol;
+import com.flowpowered.networking.protocol.AbstractProtocol;
+import org.slf4j.Logger;
 
 /**
  * Represents a connection to another engine.
@@ -41,67 +43,67 @@ public interface Session {
      *
      * @param message message to be processed
      */
-    public <T extends Message> void messageReceived(T message);
+    <T extends Message> void messageReceived(T message);
 
     /**
      * Gets the protocol associated with this session.
      *
      * @return the protocol
      */
-    public Protocol getProtocol();
+    Protocol getProtocol();
 
     /**
      * Sends a message across the network.
      *
      * @param message The message.
      */
-    public void send(Message message);
+    void send(Message message);
 
     /**
      * Sends any amount of messages to the client.
      *
      * @param messages the messages to send to the client
      */
-    public void sendAll(Message... messages);
+    void sendAll(Message... messages);
 
     /**
      * Closes the session.
      *
      */
-    public void disconnect();
+    void disconnect();
 
     /**
      * Called after the Session has been disconnected, right before the Session is invalidated.
      *
      */
-    public void onDisconnect();
+    void onDisconnect();
 
     /**
      * Called once the Session is ready for messages.
      *
      */
-    public void onReady();
+    void onReady();
 
     /**
      * Called when a throwable is thrown in the pipeline.
      *
      * @param throwable 
      */
-    public void onThrowable(Throwable throwable);
+    void onThrowable(Throwable throwable);
 
     /**
      * Returns the address of this session.
      *
      * @return The remote address.
      */
-    public InetSocketAddress getAddress();
+    InetSocketAddress getAddress();
 
     /**
      * Gets the id for this session
      *
      * @return session id
      */
-    public String getSessionId();
+    String getSessionId();
 
     /**
      * Validates that {@code c} is the channel of the session.  The channel of a session never changes.
@@ -109,12 +111,14 @@ public interface Session {
      * @param c the channel to check
      * @throws IllegalStateException if {@code c} is not the channel of the session
      */
-    public void validate(Channel c) throws IllegalStateException;
+    void validate(Channel c) throws IllegalStateException;
 
     /**
      * True if this session is open and connected. If the session is closed, errors will be thrown if messages are attempted to be sent.
      *
      * @return is active
      */
-    public boolean isActive();
+    boolean isActive();
+
+    Logger getLogger();
 }

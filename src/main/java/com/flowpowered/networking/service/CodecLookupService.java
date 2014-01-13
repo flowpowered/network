@@ -21,12 +21,10 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.flowpowered.networking.protocol;
+package com.flowpowered.networking.service;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -43,11 +41,11 @@ public class CodecLookupService {
     /**
      * A lookup table for the Message classes mapped to their Codec.
      */
-    private final ConcurrentMap<Class<? extends Message>, Codec<?>> classTable;
+    private final ConcurrentMap<Class<? extends Message>, Codec<?>> messages;
     /**
-     * A synced map for the dynamic packets.
+     * A lookup table for the Message classes mapped to their Codec.
      */
-    private final StringToUniqueIntegerMap dynamicPacketMap;
+    private final ConcurrentMap<Class<? extends Codec<?>>, Codec<?>> codecs;
     /**
      * Lookup table for opcodes mapped to their codecs.
      */
@@ -56,17 +54,17 @@ public class CodecLookupService {
      * Stores the next opcode available.
      */
     private final AtomicInteger nextId;
-
+     
     /**
      * The {@link CodecLookupService} stores the codecs available in the protocol. Codecs can be found using either the class of the message they represent or their message's opcode.
      *
      * @param dynamicPacketMap - The dynamic opcode map
      * @param size The maximum number of message types
      */
-    protected CodecLookupService(StringToUniqueIntegerMap dynamicPacketMap, int size) {
-        classTable = new ConcurrentHashMap<>(size, 1.0f);
+    public CodecLookupService(int size) {
+        messages = new ConcurrentHashMap<>(size, 1.0f);
+        codecs = new ConcurrentHashMap<>(size, 1.0f);
         opcodeTable = new Codec<?>[size];
-        this.dynamicPacketMap = dynamicPacketMap;
         nextId = new AtomicInteger(0);
     }
 
@@ -81,12 +79,11 @@ public class CodecLookupService {
      * @throws IllegalAccessException if the codec could not be instantiated due to an access violation.
      */
     @SuppressWarnings("unchecked")
-    protected <T extends Message, C extends Codec<T>> C bind(Class<C> clazz) throws InstantiationException, IllegalAccessException, InvocationTargetException {
-        if (dynamicPacketMap.getKeys().contains(clazz.getName())) {
-            // Already bound, return codec
-            return (C) opcodeTable[dynamicPacketMap.register(clazz.getName())];
+    public <T extends Message, C extends Codec<T>> C bind(Class<C> clazz) throws InstantiationException, IllegalAccessException, InvocationTargetException {
+        C codec = (C) codecs.get(clazz);
+        if (codec != null) {
+            return codec;
         }
-        C codec;
         try {
             codec = clazz.getConstructor().newInstance();
             final Codec<?> prevCodec = opcodeTable[codec.getOpcode()];
@@ -112,8 +109,8 @@ public class CodecLookupService {
             }
         }
         opcodeTable[codec.getOpcode()] = codec;
-        classTable.put(codec.getMessage(), codec);
-        dynamicPacketMap.register(clazz.getName(), codec.getOpcode());
+        messages.put(codec.getMessage(), codec);
+        codecs.put(clazz, codec);
         return codec;
     }
 
@@ -123,11 +120,15 @@ public class CodecLookupService {
      * @param opcode The opcode which the codec uses
      * @return The codec, null if not found.
      */
-    public Codec<? extends Message> find(int opcode) {
+    public Codec<? extends Message> find(int opcode) throws IllegalOpcodeException {
         if (opcode < 0 || opcode >= opcodeTable.length) {
             throw new IllegalOpcodeException("Opcode " + opcode + " is out of bounds");
         }
-        return opcodeTable[opcode];
+        Codec<? extends Message> c = opcodeTable[opcode];
+        if (c == null) {
+            throw new IllegalOpcodeException("Opcode " + opcode + " is not bound!");
+        }
+        return c;
     }
 
     /**
@@ -139,15 +140,6 @@ public class CodecLookupService {
      */
     @SuppressWarnings("unchecked")
     public <T extends Message> Codec<T> find(Class<T> clazz) {
-        return (Codec<T>) classTable.get(clazz);
-    }
-
-    /**
-     * Returns A collection of all the codecs which have been registered so far.
-     *
-     * @return Collection of codecs
-     */
-    public Collection<Codec<?>> getCodecs() {
-        return Collections.unmodifiableCollection(classTable.values());
+        return (Codec<T>) codecs.get(clazz);
     }
 }

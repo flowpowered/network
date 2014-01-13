@@ -30,7 +30,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import io.netty.channel.Channel;
 
 import com.flowpowered.networking.Message;
-import com.flowpowered.networking.protocol.Protocol;
+import com.flowpowered.networking.protocol.AbstractProtocol;
 
 /**
  * Represents a {@link BasicSession} which has both a {@link State} and {@link SendType}. It can queue messages if needed.
@@ -54,7 +54,7 @@ public abstract class PulsingSession extends BasicSession {
      *
      * @param channel The channel associated with this session.
      */
-    public PulsingSession(Channel channel, Protocol bootstrapProtocol) {
+    public PulsingSession(Channel channel, AbstractProtocol bootstrapProtocol) {
         super(channel, bootstrapProtocol);
     }
 

@@ -29,11 +29,13 @@ import java.util.Random;
 import java.util.concurrent.atomic.AtomicReference;
 
 import io.netty.channel.Channel;
+import io.netty.channel.ChannelOption;
 
 import com.flowpowered.networking.Message;
 import com.flowpowered.networking.MessageHandler;
-import com.flowpowered.networking.protocol.Protocol;
-import io.netty.channel.ChannelOption;
+import com.flowpowered.networking.protocol.AbstractProtocol;
+
+import org.slf4j.Logger;
 
 /**
  * A basic implementation of a {@link Session} which handles and sends messages instantly.
@@ -54,7 +56,7 @@ public class BasicSession implements Session {
     /**
      * The protocol for this session
      */
-    private Protocol protocol;
+    private AbstractProtocol protocol;
     /**
      * Default uncaught exception handler
      */
@@ -64,8 +66,9 @@ public class BasicSession implements Session {
      * Creates a new session.
      *
      * @param channel The channel associated with this session.
+     * @param bootstrapProtocol the protocol 
      */
-    public BasicSession(Channel channel, Protocol bootstrapProtocol) {
+    public BasicSession(Channel channel, AbstractProtocol bootstrapProtocol) {
         this.channel = channel;
         this.protocol = bootstrapProtocol;
         this.exceptionHandler = new AtomicReference<UncaughtExceptionHandler>(new DefaultUncaughtExceptionHandler(this));
@@ -73,7 +76,8 @@ public class BasicSession implements Session {
 
     @SuppressWarnings("unchecked")
     private void handleMessage(Message message) {
-        MessageHandler<Message> handler = (MessageHandler<Message>) protocol.getHandlerLookupService().find(message.getClass());
+        Class<Message> messageClass = (Class<Message>) message.getClass();
+        MessageHandler<Message> handler = protocol.getMessageHandle(messageClass);
         if (handler != null) {
             try {
                 handler.handle(this, message);
@@ -120,7 +124,7 @@ public class BasicSession implements Session {
 
     @Override
     public String toString() {
-        return BasicSession.class.getName() + " [address=" + channel.remoteAddress() + "]";
+        return getClass().getName() + " [address=" + channel.remoteAddress() + "]";
     }
 
     /**
@@ -139,11 +143,11 @@ public class BasicSession implements Session {
     }
 
     @Override
-    public Protocol getProtocol() {
+    public AbstractProtocol getProtocol() {
         return this.protocol;
     }
 
-    protected void setProtocol(Protocol protocol) {
+    protected void setProtocol(AbstractProtocol protocol) {
         this.protocol = protocol;
     }
 
@@ -207,6 +211,11 @@ public class BasicSession implements Session {
         channel.config().setOption(option, value);
     }
 
+    @Override
+    public Logger getLogger() {
+        return protocol.getLogger();
+    }
+
     public interface UncaughtExceptionHandler {
         /**
          * Called when an exception occurs during session handling
@@ -227,9 +236,8 @@ public class BasicSession implements Session {
 
         @Override
         public void uncaughtException(Message message, MessageHandler<?> handle, Exception ex) {
-            session.getProtocol().getLogger().error("Message handler for " + message.getClass().getSimpleName() + " threw exception", ex); // TODO: Use parametrized message instead of string
-                                                                                                                                           // concatation.
-            //session.disconnect("Message handler exception for " + message.getClass().getSimpleName());
+             // TODO: Use parametrized message instead of string concatation
+            session.getLogger().error("Message handler for " + message.getClass().getSimpleName() + " threw exception", ex);
             session.disconnect();
         }
     }

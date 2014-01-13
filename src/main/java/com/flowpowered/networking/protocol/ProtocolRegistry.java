@@ -33,16 +33,16 @@ import java.util.concurrent.ConcurrentHashMap;
  * This class provides a way to store Protocols by name and {@link SocketAddress}.
  *
  */
-public class ProtocolRegistry {
-    private final ConcurrentHashMap<String, Protocol> names = new ConcurrentHashMap<>();
-    private final ConcurrentHashMap<Integer, Protocol> sockets = new ConcurrentHashMap<>();
+public class ProtocolRegistry<T extends Protocol> {
+    private final ConcurrentHashMap<String, T> names = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<Integer, T> sockets = new ConcurrentHashMap<>();
 
     /**
      * Registers a Protocol under its name
      *
      * @param protocol the Protocol
      */
-    public void registerProtocol(int port, Protocol protocol) {
+    public void registerProtocol(int port, T protocol) {
         this.names.put(protocol.getName(), protocol);
         this.sockets.put(port, protocol);
     }
@@ -53,7 +53,7 @@ public class ProtocolRegistry {
      * @param name the id
      * @return the Protocol
      */
-    public Protocol getProtocol(String name) {
+    public T getProtocol(String name) {
         return this.names.get(name);
     }
 
@@ -63,7 +63,7 @@ public class ProtocolRegistry {
      * @param address the address
      * @return the Protocol
      */
-    public Protocol getProtocol(SocketAddress address) {
+    public T getProtocol(SocketAddress address) {
         if (address instanceof InetSocketAddress) {
             return this.sockets.get(((InetSocketAddress) address).getPort());
         }
@@ -75,7 +75,7 @@ public class ProtocolRegistry {
      *
      * @return All registered protocols
      */
-    public Collection<Protocol> getProtocols() {
+    public Collection<T> getProtocols() {
         return Collections.unmodifiableCollection(this.names.values());
     }
 

@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.flowpowered.networking.protocol;
+package com.flowpowered.networking.service;
 
 import com.flowpowered.networking.MessageHandler;
 import com.flowpowered.networking.Message;
@@ -31,7 +31,7 @@ import java.util.Map;
 public class HandlerLookupService {
     private final Map<Class<? extends Message>, MessageHandler<?>> handlers = new HashMap<>();
 
-    protected <M extends Message, H extends MessageHandler<? extends M>> void bind(Class<M> clazz, Class<H> handlerClass) throws InstantiationException, IllegalAccessException {
+    public <M extends Message, H extends MessageHandler<? extends M>> void bind(Class<M> clazz, Class<H> handlerClass) throws InstantiationException, IllegalAccessException {
         MessageHandler<? extends M> handler = handlerClass.newInstance();
         handlers.put(clazz, handler);
     }
@@ -39,8 +39,5 @@ public class HandlerLookupService {
     @SuppressWarnings("unchecked")
     public <T extends Message> MessageHandler<T> find(Class<T> clazz) {
         return (MessageHandler<T>) handlers.get(clazz);
-    }
-
-    protected HandlerLookupService() {
     }
 }

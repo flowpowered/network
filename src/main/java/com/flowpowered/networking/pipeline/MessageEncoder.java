@@ -26,7 +26,6 @@ package com.flowpowered.networking.pipeline;
 import com.flowpowered.networking.Codec;
 import com.flowpowered.networking.Message;
 import com.flowpowered.networking.process.ProcessingEncoder;
-import com.flowpowered.networking.protocol.Protocol;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
@@ -34,6 +33,8 @@ import io.netty.channel.ChannelHandlerContext;
 
 import java.io.IOException;
 import java.util.List;
+
+import com.flowpowered.networking.protocol.Protocol;
 
 /**
  * A {@link MessageToMessageEncoder} which encodes into {@link ByteBuf}s.
@@ -52,7 +53,7 @@ public class MessageEncoder extends ProcessingEncoder {
             final Protocol protocol = messageHandler.getSession().getProtocol();
             final Message message = (Message) msg;
             final Class<? extends Message> clazz = message.getClass();
-            final Codec<Message> codec = (Codec<Message>) protocol.getCodecLookupService().find(clazz);
+            final Codec<Message> codec = (Codec<Message>) protocol.getCodec(message.getClass());
             if (codec == null) {
                 throw new IOException("Unknown message type: " + clazz + ".");
             }

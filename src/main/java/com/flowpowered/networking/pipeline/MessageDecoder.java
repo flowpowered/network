@@ -31,8 +31,8 @@ import io.netty.channel.ChannelHandlerContext;
 import com.flowpowered.networking.Codec;
 import com.flowpowered.networking.Message;
 import com.flowpowered.networking.process.PreprocessReplayingDecoder;
-import com.flowpowered.networking.protocol.Protocol;
 import com.flowpowered.networking.exception.UnknownPacketException;
+import com.flowpowered.networking.protocol.Protocol;
 
 /**
  * A {@link PreprocessReplayingDecoder} which decodes {@link ByteBuf}s into Common {@link Message}s.
@@ -77,7 +77,7 @@ public class MessageDecoder extends PreprocessReplayingDecoder {
         }
 
         previousOpcodes[(opcodeCounter++) & PREVIOUS_MASK] = codec.getOpcode();
-        Object decoded = codec.decode(buf);
+        Message decoded = codec.decode(buf);
         buf.release();
         return decoded;
     }
