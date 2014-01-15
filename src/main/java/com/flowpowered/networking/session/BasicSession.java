@@ -40,7 +40,7 @@ import org.slf4j.Logger;
 /**
  * A basic implementation of a {@link Session} which handles and sends messages instantly.
  */
-public abstract class BasicSession implements Session {
+public class BasicSession implements Session {
     /**
      * The Random used for sessionIds.
      */
@@ -77,7 +77,7 @@ public abstract class BasicSession implements Session {
     @SuppressWarnings("unchecked")
     private void handleMessage(Message message) {
         Class<Message> messageClass = (Class<Message>) message.getClass();
-        MessageHandler<Message> handler = protocol.getMessageHandle(messageClass);
+        MessageHandler handler = (MessageHandler) protocol.getMessageHandle(messageClass);
         if (handler != null) {
             try {
                 handler.handle(this, message);
@@ -226,7 +226,7 @@ public abstract class BasicSession implements Session {
          * @param handle handler that threw the an exception handling the message
          * @param ex the exception
          */
-        public void uncaughtException(Message message, MessageHandler<?> handle, Exception ex);
+        public void uncaughtException(Message message, MessageHandler<?,?> handle, Exception ex);
     }
 
     public static final class DefaultUncaughtExceptionHandler implements UncaughtExceptionHandler {
@@ -237,7 +237,7 @@ public abstract class BasicSession implements Session {
         }
 
         @Override
-        public void uncaughtException(Message message, MessageHandler<?> handle, Exception ex) {
+        public void uncaughtException(Message message, MessageHandler<?,?> handle, Exception ex) {
              // TODO: Use parametrized message instead of string concatation
             session.getLogger().error("Message handler for " + message.getClass().getSimpleName() + " threw exception", ex);
             session.disconnect();

@@ -29,15 +29,15 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class HandlerLookupService {
-    private final Map<Class<? extends Message>, MessageHandler<?>> handlers = new HashMap<>();
+    private final Map<Class<? extends Message>, MessageHandler<?, ?>> handlers = new HashMap<>();
 
-    public <M extends Message, H extends MessageHandler<? extends M>> void bind(Class<M> clazz, Class<H> handlerClass) throws InstantiationException, IllegalAccessException {
-        MessageHandler<? extends M> handler = handlerClass.newInstance();
+    public <M extends Message, H extends MessageHandler<?, ? extends M>> void bind(Class<M> clazz, Class<H> handlerClass) throws InstantiationException, IllegalAccessException {
+        MessageHandler<?, ? extends M> handler = handlerClass.newInstance();
         handlers.put(clazz, handler);
     }
 
     @SuppressWarnings("unchecked")
-    public <T extends Message> MessageHandler<T> find(Class<T> clazz) {
-        return (MessageHandler<T>) handlers.get(clazz);
+    public <M extends Message> MessageHandler<?, M> find(Class<M> clazz) {
+        return (MessageHandler<?, M>) handlers.get(clazz);
     }
 }

@@ -28,14 +28,15 @@ import com.flowpowered.networking.session.Session;
 /**
  * Defines a class which handles a message of type {@code T}.
  *
+ * @param <S> the session to cast to. THIS IS UNSAFE.
  * @param <T> the type of message to handle
  */
-public interface MessageHandler<T extends Message> {
+public interface MessageHandler<S extends Session, T extends Message> {
     /**
      * Handles a message that was received.
      *
      * @param session the session that received the message
      * @param message the message that was received
      */
-    public void handle(Session session, T message);
+    public void handle(S session, T message);
 }

@@ -35,7 +35,7 @@ import com.flowpowered.networking.protocol.AbstractProtocol;
 /**
  * Represents a {@link BasicSession} which has both a {@link State} and {@link SendType}. It can queue messages if needed.
  */
-public abstract class PulsingSession extends BasicSession {
+public class PulsingSession extends BasicSession {
     /**
      * A queue of incoming and unprocessed messages
      */

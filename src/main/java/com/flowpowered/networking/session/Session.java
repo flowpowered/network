@@ -23,13 +23,11 @@
  */
 package com.flowpowered.networking.session;
 
-import java.net.InetSocketAddress;
-
 import io.netty.channel.Channel;
 
 import com.flowpowered.networking.Message;
 import com.flowpowered.networking.protocol.Protocol;
-import com.flowpowered.networking.protocol.AbstractProtocol;
+
 import org.slf4j.Logger;
 
 /**

@@ -93,5 +93,5 @@ public abstract class AbstractProtocol implements Protocol {
         return dynamicMessage;
     }
 
-    public abstract <M extends Message> MessageHandler<M> getMessageHandle(Class<M> message);
+    public abstract <M extends Message> MessageHandler<?, M> getMessageHandle(Class<M> message);
 }

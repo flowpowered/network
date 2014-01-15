@@ -31,7 +31,6 @@ import com.flowpowered.networking.MessageHandler;
 import com.flowpowered.networking.protocol.AbstractProtocol;
 import com.flowpowered.networking.service.CodecLookupService;
 import com.flowpowered.networking.service.HandlerLookupService;
-import com.flowpowered.networking.session.Session;
 
 import org.slf4j.Logger;
 
@@ -84,11 +83,11 @@ public abstract class SimpleProtocol extends AbstractProtocol {
     }
 
     @Override
-    public <M extends Message> MessageHandler<M> getMessageHandle(Class<M> message) {
+    public <M extends Message> MessageHandler<?, M> getMessageHandle(Class<M> message) {
         return handlerLookup.find(message);
     }
 
-    public <M extends Message, C extends Codec<M>, H extends MessageHandler<M>> C registerMessage(Class<C> codec, Class<H> handler, Integer opcode) {
+    public <M extends Message, C extends Codec<M>, H extends MessageHandler<?, M>> C registerMessage(Class<C> codec, Class<H> handler, Integer opcode) {
         try {
             C bind = codecLookup.bind(codec, opcode);
             if (bind != null && handler != null) {
