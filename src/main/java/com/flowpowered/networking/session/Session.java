@@ -92,33 +92,12 @@ public interface Session {
     void onThrowable(Throwable throwable);
 
     /**
-     * Returns the address of this session.
-     *
-     * @return The remote address.
-     */
-    InetSocketAddress getAddress();
-
-    /**
-     * Gets the id for this session
-     *
-     * @return session id
-     */
-    String getSessionId();
-
-    /**
      * Validates that {@code c} is the channel of the session.  The channel of a session never changes.
      *
      * @param c the channel to check
      * @throws IllegalStateException if {@code c} is not the channel of the session
      */
     void validate(Channel c) throws IllegalStateException;
-
-    /**
-     * True if this session is open and connected. If the session is closed, errors will be thrown if messages are attempted to be sent.
-     *
-     * @return is active
-     */
-    boolean isActive();
 
     Logger getLogger();
 }

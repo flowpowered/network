@@ -40,7 +40,7 @@ import org.slf4j.Logger;
 /**
  * A basic implementation of a {@link Session} which handles and sends messages instantly.
  */
-public class BasicSession implements Session {
+public abstract class BasicSession implements Session {
     /**
      * The Random used for sessionIds.
      */
@@ -112,7 +112,6 @@ public class BasicSession implements Session {
      *
      * @return The remote address.
      */
-    @Override
     public InetSocketAddress getAddress() {
         SocketAddress addr = channel.remoteAddress();
         if (!(addr instanceof InetSocketAddress)) {
@@ -137,7 +136,6 @@ public class BasicSession implements Session {
         handleMessage(message);
     }
 
-    @Override
     public String getSessionId() {
         return sessionId;
     }
@@ -151,7 +149,11 @@ public class BasicSession implements Session {
         this.protocol = protocol;
     }
 
-    @Override
+    /**
+     * True if this session is open and connected. If the session is closed, errors will be thrown if messages are attempted to be sent.
+     *
+     * @return is active
+     */
     public boolean isActive() {
         return channel.isActive();
     }

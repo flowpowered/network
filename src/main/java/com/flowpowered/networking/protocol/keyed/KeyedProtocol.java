@@ -33,6 +33,7 @@ import com.flowpowered.networking.MessageHandler;
 import com.flowpowered.networking.protocol.AbstractProtocol;
 import com.flowpowered.networking.service.CodecLookupService;
 import com.flowpowered.networking.service.HandlerLookupService;
+import com.flowpowered.networking.session.Session;
 
 import org.slf4j.Logger;
 
@@ -82,7 +83,7 @@ public abstract class KeyedProtocol extends AbstractProtocol {
         return codecLookup.get(key);
     }
 
-    public <M extends Message, C extends Codec<M>, H extends MessageHandler<M>> C registerMessage(String key, Class<C> codec, Class<H> handler) {
+    public <M extends Message, C extends Codec<M>, H extends MessageHandler<M>> C registerMessage(String key, Class<C> codec, Class<H> handler, Integer opcode) {
         try {
             CodecLookupService codecLookup = this.codecLookup.get(key);
             if (codecLookup == null) {
@@ -94,7 +95,7 @@ public abstract class KeyedProtocol extends AbstractProtocol {
                 handlerLookup = new HandlerLookupService();
                 this.handlerLookup.put(key, handlerLookup);
             }
-            C bind = codecLookup.bind(codec);
+            C bind = codecLookup.bind(codec, opcode);
             if (bind != null && handler != null) {
                 handlerLookup.bind(bind.getMessage(), handler);
             }

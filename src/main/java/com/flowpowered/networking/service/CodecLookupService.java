@@ -29,7 +29,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import com.flowpowered.commons.StringToUniqueIntegerMap;
 import com.flowpowered.networking.Codec;
 import com.flowpowered.networking.Message;
 import com.flowpowered.networking.exception.IllegalOpcodeException;
@@ -41,11 +40,11 @@ public class CodecLookupService {
     /**
      * A lookup table for the Message classes mapped to their Codec.
      */
-    private final ConcurrentMap<Class<? extends Message>, Codec<?>> messages;
+    private final ConcurrentMap<Class<? extends Message>, CodecRegistration> messages;
     /**
      * A lookup table for the Message classes mapped to their Codec.
      */
-    private final ConcurrentMap<Class<? extends Codec<?>>, Codec<?>> codecs;
+    private final ConcurrentMap<Class<? extends Codec<?>>, CodecRegistration> codecs;
     /**
      * Lookup table for opcodes mapped to their codecs.
      */
@@ -72,45 +71,51 @@ public class CodecLookupService {
      * Binds a codec by adding entries for it to the tables. TODO: if a dynamic opcode is registered then a static opcode tries to register, reassign dynamic. TODO: if a static opcode is registered then
      * a static opcode tries to register, throw exception
      *
-     * @param clazz The codec's class.
-     * @param <T> The type of message
+     * @param messageClazz The message's class
+     * @param codecClazz The codec's class.
+     * @param opcode the opcode to register with, or null if the codec should be dynamic
+     * @param <M> The type of message
      * @param <C> The type of codec.
      * @throws InstantiationException if the codec could not be instantiated.
      * @throws IllegalAccessException if the codec could not be instantiated due to an access violation.
      */
     @SuppressWarnings("unchecked")
-    public <T extends Message, C extends Codec<T>> C bind(Class<C> clazz) throws InstantiationException, IllegalAccessException, InvocationTargetException {
-        C codec = (C) codecs.get(clazz);
-        if (codec != null) {
-            return codec;
+    public <M extends Message, C extends Codec<M>> C bind(Class<C> codecClazz, Integer opcode) throws InstantiationException, IllegalAccessException, InvocationTargetException {
+        CodecRegistration reg = codecs.get(codecClazz);
+        if (reg != null) {
+            return (C) reg.codec;
         }
+        C codec;
         try {
-            codec = clazz.getConstructor().newInstance();
-            final Codec<?> prevCodec = opcodeTable[codec.getOpcode()];
-            if (prevCodec != null) {
-                throw new IllegalStateException("Trying to bind a static opcode where one already exists. Static: " + clazz.getSimpleName() + " Other: " + prevCodec.getClass().getSimpleName());
-            }
-        } catch (NoSuchMethodException e) {
-            try {
-                Constructor<C> constructor = clazz.getConstructor(int.class);
-                int id;
-                try {
-                    do {
-                        id = nextId.getAndIncrement();
-                    } while (opcodeTable[id] != null);
-                } catch (IndexOutOfBoundsException ioobe) {
-                    throw new IllegalStateException("Ran out of Ids!", ioobe);
-                }
-                codec = constructor.newInstance(id);
-            } catch (NoSuchMethodException e1) {
-                IllegalArgumentException iae = new IllegalArgumentException("Codec must either have a zero arg or single int arg constructor!", e1);
-                iae.addSuppressed(e);
-                throw iae;
-            }
+            Constructor<C> con = codecClazz.getConstructor();
+            con.setAccessible(true);
+            codec = con.newInstance();
+        } catch(NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
+            throw new IllegalArgumentException("Codec could not be created!", e);
         }
-        opcodeTable[codec.getOpcode()] = codec;
-        messages.put(codec.getMessage(), codec);
-        codecs.put(clazz, codec);
+        if (opcode != null) {
+            if (opcode <= 0) {
+                throw new IllegalArgumentException("Opcode must either be null or greater than 0!");
+            }
+            final Codec<?> prevCodec = opcodeTable[opcode];
+            if (prevCodec != null) {
+                throw new IllegalStateException("Trying to bind a static opcode where one already exists. Static: " + codecClazz.getSimpleName() + " Other: " + prevCodec.getClass().getSimpleName());
+            }
+        } else {
+            int id;
+            try {
+                do {
+                    id = nextId.getAndIncrement();
+                } while (opcodeTable[id] != null);
+            } catch (IndexOutOfBoundsException ioobe) {
+                throw new IllegalStateException("Ran out of Ids!", ioobe);
+            }
+            opcode = id;
+        }
+        reg = new CodecRegistration(opcode, codec);
+        opcodeTable[opcode] = codec;
+        messages.put(codec.getMessage(), reg);
+        codecs.put(codecClazz, reg);
         return codec;
     }
 
@@ -140,6 +145,16 @@ public class CodecLookupService {
      */
     @SuppressWarnings("unchecked")
     public <T extends Message> Codec<T> find(Class<T> clazz) {
-        return (Codec<T>) codecs.get(clazz);
+        return (Codec<T>) messages.get(clazz).codec;
+    }
+
+    private class CodecRegistration {
+        private final int opcode;
+        private final Codec<?> codec;
+
+        public CodecRegistration(int opcode, Codec<?> codec) {
+            this.opcode = opcode;
+            this.codec = codec;
+        }
     }
 }

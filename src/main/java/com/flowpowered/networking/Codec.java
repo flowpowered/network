@@ -32,23 +32,13 @@ import java.io.IOException;
  */
 public abstract class Codec<T extends Message> {
     private final Class<T> clazz;
-    private int opcode;
 
-    public Codec(Class<T> clazz, int opcode) {
+    public Codec(Class<T> clazz) {
         this.clazz = clazz;
-        this.opcode = opcode;
     }
 
     public final Class<T> getMessage() {
         return clazz;
-    }
-
-    public final int getOpcode() {
-        return opcode;
-    }
-
-    void setOpcode(int opcode) {
-        this.opcode = opcode;
     }
 
     /**
