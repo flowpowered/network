@@ -26,6 +26,7 @@ package com.flowpowered.networking.protocol.simple;
 import java.lang.reflect.InvocationTargetException;
 
 import com.flowpowered.networking.Codec;
+import com.flowpowered.networking.Codec.CodecRegistration;
 import com.flowpowered.networking.Message;
 import com.flowpowered.networking.MessageHandler;
 import com.flowpowered.networking.protocol.AbstractProtocol;
@@ -78,7 +79,7 @@ public abstract class SimpleProtocol extends AbstractProtocol {
     }
 
     @Override
-    public <M extends Message> Codec<M> getCodec(Class<M> message) {
+    public <M extends Message> CodecRegistration getCodecRegistration(Class<M> message) {
         return codecLookup.find(message);
     }
 
@@ -87,11 +88,11 @@ public abstract class SimpleProtocol extends AbstractProtocol {
         return handlerLookup.find(message);
     }
 
-    public <M extends Message, C extends Codec<M>, H extends MessageHandler<?, M>> C registerMessage(Class<C> codec, Class<H> handler, Integer opcode) {
+    public <M extends Message, C extends Codec<M>, H extends MessageHandler<?, M>> CodecRegistration registerMessage(Class<C> codec, Class<H> handler, Integer opcode) {
         try {
-            C bind = codecLookup.bind(codec, opcode);
+            CodecRegistration bind = codecLookup.bind(codec, opcode);
             if (bind != null && handler != null) {
-                handlerLookup.bind(bind.getMessage(), handler);
+                handlerLookup.bind(bind.getCodec().getMessage(), handler);
             }
             return bind;
         } catch (InstantiationException | IllegalAccessException | InvocationTargetException e) {

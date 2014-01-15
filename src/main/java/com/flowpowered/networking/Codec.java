@@ -59,4 +59,23 @@ public abstract class Codec<T extends Message> {
      * @throws IOException If any data on the message fails to encode
      */
     public abstract ByteBuf encode(ByteBuf buf, T message) throws IOException;
+
+    public static class CodecRegistration {
+        private final int opcode;
+        private final Codec<?> codec;
+
+        public CodecRegistration(int opcode, Codec<?> codec) {
+            this.opcode = opcode;
+            this.codec = codec;
+        }
+
+        public int getOpcode() {
+            return opcode;
+        }
+
+        public <M extends Message> Codec<M> getCodec() {
+            return (Codec<M>) codec;
+        }
+        
+    }
 }

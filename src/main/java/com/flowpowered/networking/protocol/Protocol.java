@@ -25,6 +25,7 @@ package com.flowpowered.networking.protocol;
 
 import com.flowpowered.commons.Named;
 import com.flowpowered.networking.Codec;
+import com.flowpowered.networking.Codec.CodecRegistration;
 import com.flowpowered.networking.Message;
 import com.flowpowered.networking.exception.UnknownPacketException;
 
@@ -47,7 +48,7 @@ public interface Protocol extends Named {
      * @param message the message
      * @return the codec to encode with
      */
-    <M extends Message> Codec<M> getCodec(Class<M> message);
+    <M extends Message> CodecRegistration getCodecRegistration(Class<M> message);
 
     /**
      * Writes a packet header to a new buffer.
@@ -57,5 +58,5 @@ public interface Protocol extends Named {
      * @param header the buffer which to write the header to
      * @return The buffer with the packet header
      */
-    ByteBuf writeHeader(Codec<?> codec, ByteBuf data, ByteBuf header);
+    ByteBuf writeHeader(CodecRegistration codec, ByteBuf data, ByteBuf header);
 }

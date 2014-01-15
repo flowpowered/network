@@ -53,12 +53,12 @@ public class MessageEncoder extends ProcessingEncoder {
             final Protocol protocol = messageHandler.getSession().getProtocol();
             final Message message = (Message) msg;
             final Class<? extends Message> clazz = message.getClass();
-            final Codec<Message> codec = (Codec<Message>) protocol.getCodec(message.getClass());
-            if (codec == null) {
+            Codec.CodecRegistration reg = protocol.getCodecRegistration(message.getClass());
+            if (reg == null) {
                 throw new IOException("Unknown message type: " + clazz + ".");
             }
-            final ByteBuf messageBuf = codec.encode(ctx.alloc().buffer(), message);
-            final ByteBuf headerBuf = protocol.writeHeader(codec, messageBuf, ctx.alloc().buffer());
+            final ByteBuf messageBuf = reg.getCodec().encode(ctx.alloc().buffer(), message);
+            final ByteBuf headerBuf = protocol.writeHeader(reg, messageBuf, ctx.alloc().buffer());
             out.add(Unpooled.wrappedBuffer(headerBuf, messageBuf));
         }
     }

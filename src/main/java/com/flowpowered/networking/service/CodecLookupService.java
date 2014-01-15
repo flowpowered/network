@@ -30,6 +30,7 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import com.flowpowered.networking.Codec;
+import com.flowpowered.networking.Codec.CodecRegistration;
 import com.flowpowered.networking.Message;
 import com.flowpowered.networking.exception.IllegalOpcodeException;
 
@@ -48,7 +49,7 @@ public class CodecLookupService {
     /**
      * Lookup table for opcodes mapped to their codecs.
      */
-    private final Codec<?>[] opcodeTable;
+    private final CodecRegistration[] opcodeTable;
     /**
      * Stores the next opcode available.
      */
@@ -63,7 +64,7 @@ public class CodecLookupService {
     public CodecLookupService(int size) {
         messages = new ConcurrentHashMap<>(size, 1.0f);
         codecs = new ConcurrentHashMap<>(size, 1.0f);
-        opcodeTable = new Codec<?>[size];
+        opcodeTable = new CodecRegistration[size];
         nextId = new AtomicInteger(0);
     }
 
@@ -76,14 +77,15 @@ public class CodecLookupService {
      * @param opcode the opcode to register with, or null if the codec should be dynamic
      * @param <M> The type of message
      * @param <C> The type of codec.
+     * @return the registration object of the codec
      * @throws InstantiationException if the codec could not be instantiated.
      * @throws IllegalAccessException if the codec could not be instantiated due to an access violation.
      */
     @SuppressWarnings("unchecked")
-    public <M extends Message, C extends Codec<M>> C bind(Class<C> codecClazz, Integer opcode) throws InstantiationException, IllegalAccessException, InvocationTargetException {
+    public <M extends Message, C extends Codec<M>> CodecRegistration bind(Class<C> codecClazz, Integer opcode) throws InstantiationException, IllegalAccessException, InvocationTargetException {
         CodecRegistration reg = codecs.get(codecClazz);
         if (reg != null) {
-            return (C) reg.codec;
+            return reg;
         }
         C codec;
         try {
@@ -97,9 +99,9 @@ public class CodecLookupService {
             if (opcode <= 0) {
                 throw new IllegalArgumentException("Opcode must either be null or greater than 0!");
             }
-            final Codec<?> prevCodec = opcodeTable[opcode];
+            final CodecRegistration prevCodec = opcodeTable[opcode];
             if (prevCodec != null) {
-                throw new IllegalStateException("Trying to bind a static opcode where one already exists. Static: " + codecClazz.getSimpleName() + " Other: " + prevCodec.getClass().getSimpleName());
+                throw new IllegalStateException("Trying to bind a static opcode where one already exists. Static: " + codecClazz.getSimpleName() + " Other: " + prevCodec.getCodec().getClass().getSimpleName());
             }
         } else {
             int id;
@@ -113,10 +115,10 @@ public class CodecLookupService {
             opcode = id;
         }
         reg = new CodecRegistration(opcode, codec);
-        opcodeTable[opcode] = codec;
+        opcodeTable[opcode] = reg;
         messages.put(codec.getMessage(), reg);
         codecs.put(codecClazz, reg);
-        return codec;
+        return reg;
     }
 
     /**
@@ -125,11 +127,11 @@ public class CodecLookupService {
      * @param opcode The opcode which the codec uses
      * @return The codec, null if not found.
      */
-    public Codec<? extends Message> find(int opcode) throws IllegalOpcodeException {
+    public CodecRegistration find(int opcode) throws IllegalOpcodeException {
         if (opcode < 0 || opcode >= opcodeTable.length) {
             throw new IllegalOpcodeException("Opcode " + opcode + " is out of bounds");
         }
-        Codec<? extends Message> c = opcodeTable[opcode];
+        CodecRegistration c = opcodeTable[opcode];
         if (c == null) {
             throw new IllegalOpcodeException("Opcode " + opcode + " is not bound!");
         }
@@ -144,17 +146,7 @@ public class CodecLookupService {
      * @return The codec, or {@code null} if it could not be found.
      */
     @SuppressWarnings("unchecked")
-    public <T extends Message> Codec<T> find(Class<T> clazz) {
-        return (Codec<T>) messages.get(clazz).codec;
-    }
-
-    private class CodecRegistration {
-        private final int opcode;
-        private final Codec<?> codec;
-
-        public CodecRegistration(int opcode, Codec<?> codec) {
-            this.opcode = opcode;
-            this.codec = codec;
-        }
+    public <T extends Message> CodecRegistration find(Class<T> clazz) {
+        return messages.get(clazz);
     }
 }

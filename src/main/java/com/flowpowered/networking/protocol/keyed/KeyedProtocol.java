@@ -28,6 +28,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
 import com.flowpowered.networking.Codec;
+import com.flowpowered.networking.Codec.CodecRegistration;
 import com.flowpowered.networking.Message;
 import com.flowpowered.networking.MessageHandler;
 import com.flowpowered.networking.protocol.AbstractProtocol;
@@ -82,7 +83,7 @@ public abstract class KeyedProtocol extends AbstractProtocol {
         return codecLookup.get(key);
     }
 
-    public <M extends Message, C extends Codec<M>, H extends MessageHandler<?, M>> C registerMessage(String key, Class<C> codec, Class<H> handler, Integer opcode) {
+    public <M extends Message, C extends Codec<M>, H extends MessageHandler<?, M>> CodecRegistration registerMessage(String key, Class<C> codec, Class<H> handler, Integer opcode) {
         try {
             CodecLookupService codecLookup = this.codecLookup.get(key);
             if (codecLookup == null) {
@@ -94,9 +95,9 @@ public abstract class KeyedProtocol extends AbstractProtocol {
                 handlerLookup = new HandlerLookupService();
                 this.handlerLookup.put(key, handlerLookup);
             }
-            C bind = codecLookup.bind(codec, opcode);
+            CodecRegistration bind = codecLookup.bind(codec, opcode);
             if (bind != null && handler != null) {
-                handlerLookup.bind(bind.getMessage(), handler);
+                handlerLookup.bind(bind.getCodec().getMessage(), handler);
             }
             return bind;
         } catch (InstantiationException | IllegalAccessException | InvocationTargetException e) {
