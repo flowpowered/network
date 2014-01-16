@@ -96,8 +96,8 @@ public class CodecLookupService {
             throw new IllegalArgumentException("Codec could not be created!", e);
         }
         if (opcode != null) {
-            if (opcode <= 0) {
-                throw new IllegalArgumentException("Opcode must either be null or greater than 0!");
+            if (opcode < 0) {
+                throw new IllegalArgumentException("Opcode must either be null or greater than or equal to 0!");
             }
             final CodecRegistration prevCodec = opcodeTable[opcode];
             if (prevCodec != null) {
