@@ -30,17 +30,7 @@ import java.io.IOException;
 /**
  * {@code Codec}s are used to encode and decode a {@link Message} into a {@link ByteBuf}.
  */
-public abstract class Codec<T extends Message> {
-    private final Class<T> clazz;
-
-    public Codec(Class<T> clazz) {
-        this.clazz = clazz;
-    }
-
-    public final Class<T> getMessage() {
-        return clazz;
-    }
-
+public interface Codec<T extends Message> {
     /**
      * Decodes a {@link ByteBuf} into a {@link Message}.
      *
@@ -48,7 +38,7 @@ public abstract class Codec<T extends Message> {
      * @return the message fully encoded.
      * @throws IOException If any decoding fails on the buffer
      */
-    public abstract T decode(ByteBuf buffer) throws IOException;
+    T decode(ByteBuf buffer) throws IOException;
 
     /**
      * Encodes a {@link Message} into a {@link ByteBuffer}.
@@ -58,7 +48,7 @@ public abstract class Codec<T extends Message> {
      * @return A buffer ready to be sent
      * @throws IOException If any data on the message fails to encode
      */
-    public abstract ByteBuf encode(ByteBuf buf, T message) throws IOException;
+    ByteBuf encode(ByteBuf buf, T message) throws IOException;
 
     public static class CodecRegistration {
         private final int opcode;

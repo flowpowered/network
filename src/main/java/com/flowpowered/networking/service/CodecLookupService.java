@@ -82,7 +82,7 @@ public class CodecLookupService {
      * @throws IllegalAccessException if the codec could not be instantiated due to an access violation.
      */
     @SuppressWarnings("unchecked")
-    public <M extends Message, C extends Codec<M>> CodecRegistration bind(Class<C> codecClazz, Integer opcode) throws InstantiationException, IllegalAccessException, InvocationTargetException {
+    public <M extends Message, C extends Codec<M>> CodecRegistration bind(Class<M> message, Class<C> codecClazz, Integer opcode) throws InstantiationException, IllegalAccessException, InvocationTargetException {
         CodecRegistration reg = codecs.get(codecClazz);
         if (reg != null) {
             return reg;
@@ -116,7 +116,7 @@ public class CodecLookupService {
         }
         reg = new CodecRegistration(opcode, codec);
         opcodeTable[opcode] = reg;
-        messages.put(codec.getMessage(), reg);
+        messages.put(message, reg);
         codecs.put(codecClazz, reg);
         return reg;
     }
@@ -146,7 +146,7 @@ public class CodecLookupService {
      * @return The codec, or {@code null} if it could not be found.
      */
     @SuppressWarnings("unchecked")
-    public <T extends Message> CodecRegistration find(Class<T> clazz) {
+    public <M extends Message> CodecRegistration find(Class<M> clazz) {
         return messages.get(clazz);
     }
 }

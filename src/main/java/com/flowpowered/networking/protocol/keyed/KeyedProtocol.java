@@ -83,7 +83,7 @@ public abstract class KeyedProtocol extends AbstractProtocol {
         return codecLookup.get(key);
     }
 
-    public <M extends Message, C extends Codec<M>, H extends MessageHandler<?, M>> CodecRegistration registerMessage(String key, Class<C> codec, Class<H> handler, Integer opcode) {
+    public <M extends Message, C extends Codec<M>, H extends MessageHandler<?, M>> CodecRegistration registerMessage(String key, Class<M> message, Class<C> codec, Class<H> handler, Integer opcode) {
         try {
             CodecLookupService codecLookup = this.codecLookup.get(key);
             if (codecLookup == null) {
@@ -95,9 +95,9 @@ public abstract class KeyedProtocol extends AbstractProtocol {
                 handlerLookup = new HandlerLookupService();
                 this.handlerLookup.put(key, handlerLookup);
             }
-            CodecRegistration bind = codecLookup.bind(codec, opcode);
+            CodecRegistration bind = codecLookup.bind(message, codec, opcode);
             if (bind != null && handler != null) {
-                handlerLookup.bind(bind.getCodec().getMessage(), handler);
+                handlerLookup.bind(message, handler);
             }
             return bind;
         } catch (InstantiationException | IllegalAccessException | InvocationTargetException e) {
