@@ -48,18 +48,15 @@ public class MessageEncoder extends ProcessingEncoder {
 
     @SuppressWarnings("unchecked")
     @Override
-    protected void encodePreProcess(ChannelHandlerContext ctx, final Object msg, List<Object> out) throws IOException {
-        if (msg instanceof Message) {
-            final Protocol protocol = messageHandler.getSession().getProtocol();
-            final Message message = (Message) msg;
-            final Class<? extends Message> clazz = message.getClass();
-            Codec.CodecRegistration reg = protocol.getCodecRegistration(message.getClass());
-            if (reg == null) {
-                throw new IOException("Unknown message type: " + clazz + ".");
-            }
-            final ByteBuf messageBuf = reg.getCodec().encode(ctx.alloc().buffer(), message);
-            final ByteBuf headerBuf = protocol.writeHeader(reg, messageBuf, ctx.alloc().buffer());
-            out.add(Unpooled.wrappedBuffer(headerBuf, messageBuf));
+    protected void encodePreProcess(ChannelHandlerContext ctx, final Message message, List<ByteBuf> out) throws IOException {
+        final Protocol protocol = messageHandler.getSession().getProtocol();
+        final Class<? extends Message> clazz = message.getClass();
+        Codec.CodecRegistration reg = protocol.getCodecRegistration(message.getClass());
+        if (reg == null) {
+            throw new IOException("Unknown message type: " + clazz + ".");
         }
+        final ByteBuf messageBuf = reg.getCodec().encode(ctx.alloc().buffer(), message);
+        final ByteBuf headerBuf = protocol.writeHeader(reg, messageBuf, ctx.alloc().buffer());
+        out.add(Unpooled.wrappedBuffer(headerBuf, messageBuf));
     }
 }

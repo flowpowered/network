@@ -24,11 +24,9 @@
 package com.flowpowered.networking.process;
 
 import java.util.List;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
 import io.netty.buffer.ByteBuf;
-import io.netty.buffer.CompositeByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.ByteToMessageDecoder;
 
@@ -36,10 +34,9 @@ import io.netty.handler.codec.ByteToMessageDecoder;
  * This class is both a {@link ByteToMessageDecoder} but also allows processing pre-decode via {@code decodeProcessed}.
  *
  */
-public abstract class PreprocessReplayingDecoder extends ByteToMessageDecoder implements ProcessorHandler {
+public abstract class PreprocessReplayingDecoder extends ByteToMessageDecoder implements DecodingProcessorHandler {
     private final AtomicReference<ChannelProcessor> processor = new AtomicReference<>(null);
     private final ReplayableByteBuf replayableBuffer = new ReplayableByteBuf();
-    private final AtomicBoolean locked = new AtomicBoolean(false);
     private final int capacity;
     private ByteBuf processedBuffer = null;
 
@@ -55,26 +52,17 @@ public abstract class PreprocessReplayingDecoder extends ByteToMessageDecoder im
 
     @Override
     protected void decode(ChannelHandlerContext ctx, ByteBuf buf, List<Object> frames) throws Exception {
-        if (!buf.isReadable()) {
-            return;
-        }
-
-        if (locked.get()) {
-            throw new IllegalStateException("Decode attempted when channel was locked");
-        }
-
         Object frame;
-
-        ChannelProcessor processor = this.processor.get();
         ByteBuf liveBuffer;
         do {
+            ChannelProcessor processor = this.processor.get();
             if (processor == null) {
                 liveBuffer = buf;
             } else {
                 if (processedBuffer == null) {
                     processedBuffer = ctx.alloc().buffer();
                 }
-                processedBuffer = processor.process(ctx, buf, processedBuffer);
+                processor.process(ctx, buf, processedBuffer);
                 liveBuffer = processedBuffer;
             }
             int readPointer = liveBuffer.readerIndex();
@@ -91,34 +79,29 @@ public abstract class PreprocessReplayingDecoder extends ByteToMessageDecoder im
                 frames.add(frame);
                 if (frame instanceof ProcessorSetupMessage) {
                     ProcessorSetupMessage setupMessage = (ProcessorSetupMessage) frame;
-                    ChannelProcessor newProcessor = setupMessage.getProcessor();
-                    if (newProcessor != null) {
-                        setProcessor(newProcessor);
-                    }
-                    if (setupMessage.isChannelLocking()) {
-                        locked.set(true);
-                    } else {
-                        locked.set(false);
-                    }
-                    setupMessage.setProcessorHandler(this);
+                    setupMessage.setDecodingProcessorHandler(this);
                 }
-                processor = this.processor.get();
             }
-        } while (frame != null && !locked.get());
+        } while (frame != null);
 
+        // This is to ensure that the processedBuffer doesn't get too large
+        // We want to try to cap the processedBuffer at capacity
         if (processedBuffer != null) {
-            if (processedBuffer instanceof CompositeByteBuf || (processedBuffer.capacity() > capacity && processedBuffer.isWritable())) {
+            if (processedBuffer.capacity() > capacity && processedBuffer.isWritable()) {
                 ByteBuf newBuffer = ctx.alloc().buffer(Math.max(capacity, processedBuffer.readableBytes()));
                 if (processedBuffer.isReadable()) {
                     // This method transfers the data in processedBuffer to the newBuffer.
-                    // However, for some reason, if processedBuffer is zero length, it causes an exception.
+                    // However, for some reason, if processedBuffer is zero length, it causes an exception; therefore, we check if we have any readable bytes (more than 0)
+                    // TODO: test if true
                     newBuffer.writeBytes(processedBuffer);
                 }
                 ByteBuf old = processedBuffer;
                 processedBuffer = newBuffer;
                 old.release();
+            } else {
+                // If the capacity was greater, then we've discarded all the read bytes already
+                processedBuffer.discardReadBytes();
             }
-            processedBuffer.discardReadBytes();
         }
     }
 
@@ -126,10 +109,8 @@ public abstract class PreprocessReplayingDecoder extends ByteToMessageDecoder im
     public void setProcessor(ChannelProcessor processor) {
         if (processor == null) {
             throw new IllegalArgumentException("Processor may not be set to null");
-        } else if (!this.processor.compareAndSet(null, processor)) {
-            throw new IllegalArgumentException("Processor may only be set once");
         }
-        locked.set(false);
+        this.processor.set(processor);
     }
 
     /**

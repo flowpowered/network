@@ -76,6 +76,7 @@ public class PreprocessReplayingDecoderTest {
 
             // Write info to a new ByteBuf
             final ByteBuf buf = Unpooled.buffer(burstSize);
+            buf.retain();
             buf.writeBytes(input, i, burstSize);
             i += burstSize;
 

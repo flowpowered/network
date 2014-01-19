@@ -23,76 +23,46 @@
  */
 package com.flowpowered.networking.process;
 
-import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.ChannelPromise;
 import io.netty.handler.codec.MessageToMessageEncoder;
-import java.util.ArrayList;
-import java.util.List;
+
+import com.flowpowered.networking.Message;
 
 /**
  * This class provides a layer of processing after encode but before the message is passed outbound.
- *
  */
-public abstract class ProcessingEncoder extends MessageToMessageEncoder<Object> implements ProcessorHandler {
+public abstract class ProcessingEncoder extends MessageToMessageEncoder<Message> {
     private final AtomicReference<ChannelProcessor> processor = new AtomicReference<>();
-    private final AtomicBoolean locked = new AtomicBoolean(false);
-
-    @Override
-    public void write(ChannelHandlerContext ctx, Object msg, ChannelPromise promise) throws Exception {
-        if (locked.get()) {
-            throw new IllegalStateException("Encode attempted when channel was locked");
-        }
-        super.write(ctx, msg, promise);
-    }
 
     private void checkForSetupMessage(Object e) {
         if (e instanceof ProcessorSetupMessage) {
             ProcessorSetupMessage setupMessage = (ProcessorSetupMessage) e;
             ChannelProcessor newProcessor = setupMessage.getProcessor();
-            if (newProcessor != null) {
-                setProcessor(newProcessor);
-            }
-            if (setupMessage.isChannelLocking()) {
-                locked.set(true);
-            } else {
-                locked.set(false);
-            }
-            setupMessage.setProcessorHandler(this);
+            processor.set(newProcessor);
         }
     }
 
     @Override
-    public void setProcessor(ChannelProcessor processor) {
-        if (processor == null) {
-            throw new IllegalArgumentException("Processor may not be set to null");
-        } else if (!this.processor.compareAndSet(null, processor)) {
-            throw new IllegalArgumentException("Processor may only be set once");
-        }
-        locked.set(false);
-    }
-
-    @Override
-    protected void encode(ChannelHandlerContext ctx, final Object msg, List<Object> out) throws Exception {
-        List<Object> newOut = new ArrayList<>();
+    protected void encode(ChannelHandlerContext ctx, final Message msg, List<Object> out) throws Exception {
+        List<ByteBuf> newOut = new ArrayList<>();
         encodePreProcess(ctx, msg, newOut);
         final ChannelProcessor processor = this.processor.get();
-        for (final Object encoded : newOut) {
-            Object toAdd = encoded;
-            if (processor != null && encoded instanceof ByteBuf) {
-                synchronized (this) {
-                    // Gotta release the old
-                    toAdd = processor.process(ctx, (ByteBuf) encoded, ctx.alloc().buffer());
-                    ((ByteBuf) encoded).release();
-                }
+        for (final ByteBuf encoded : newOut) {
+            ByteBuf toAdd = ctx.alloc().buffer();
+            if (processor != null) {
+                processor.process(ctx, encoded, toAdd);
+                // Gotta release the old
+                encoded.release();
             }
             out.add(toAdd);
         }
         checkForSetupMessage(msg);
     }
 
-    protected abstract void encodePreProcess(ChannelHandlerContext ctx, Object msg, List<Object> out) throws Exception;
+    protected abstract void encodePreProcess(ChannelHandlerContext ctx, Message msg, List<ByteBuf> out) throws Exception;
 }

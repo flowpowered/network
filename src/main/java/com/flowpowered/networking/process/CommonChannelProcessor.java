@@ -39,10 +39,7 @@ public abstract class CommonChannelProcessor implements ChannelProcessor {
     }
 
     @Override
-    public final synchronized ByteBuf process(ChannelHandlerContext ctx, final ByteBuf input, ByteBuf buffer) {
-        if (buffer == null) {
-            throw new IllegalArgumentException("buffer cannot be null!");
-        }
+    public final synchronized void process(ChannelHandlerContext ctx, final ByteBuf input, ByteBuf buffer) {
         int remaining;
         while ((remaining = input.readableBytes()) > 0) {
             int clamped = Math.min(remaining, capacity);
@@ -53,8 +50,6 @@ public abstract class CommonChannelProcessor implements ChannelProcessor {
                 buffer.writeBytes(byteBuffer, 0, read);
             }
         }
-
-        return buffer;
     }
 
     /**

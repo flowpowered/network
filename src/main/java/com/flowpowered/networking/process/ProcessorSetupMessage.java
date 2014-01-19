@@ -25,25 +25,21 @@ package com.flowpowered.networking.process;
 
 import com.flowpowered.networking.Message;
 
+/**
+ * This interface is used to mark messages that are used to setup the ChannelProcessor.
+ */
 public interface ProcessorSetupMessage extends Message {
-    /**
-     * Gets the processor to use to process messages subsequent to this one
+    /*
+     * Gets the processor to use to process messages subsequent to this one. Called after the Message has been encoded to set the ChannelProcessor for subsequent messages.
      *
      * @return the new ChannelProcessor or null for none
      */
     public ChannelProcessor getProcessor();
 
     /**
-     * Gets if the channel should process any more packets pending processor setup
+     * Called by {@link DecodingProcessorHandler} to indicate the {@link DecodingProcessorHandler} instance to use. Called post-decode.
      *
-     * @return true if the channel should be locked after receiving this message
+     * @param handler the new handler
      */
-    public boolean isChannelLocking();
-
-    /**
-     * Sets the processor handler associated with this packet
-     *
-     * @param handler the handler
-     */
-    public void setProcessorHandler(ProcessorHandler handler);
+    public void setDecodingProcessorHandler(DecodingProcessorHandler handler);
 }

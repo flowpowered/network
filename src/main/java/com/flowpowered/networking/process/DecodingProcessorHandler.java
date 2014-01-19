@@ -26,9 +26,11 @@ package com.flowpowered.networking.process;
 /**
  * Represents a processor handler.
  */
-public interface ProcessorHandler {
+public interface DecodingProcessorHandler {
     /**
-     * Sets the processor to be used to process the packets<br>
+     * Sets the processor to be used to process the packets
+     *
+     * @param processor the new processor
      */
     public void setProcessor(ChannelProcessor processor);
 }

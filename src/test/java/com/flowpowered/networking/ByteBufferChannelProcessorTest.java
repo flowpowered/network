@@ -85,8 +85,8 @@ public class ByteBufferChannelProcessorTest {
             buffer.writeBytes(input, writePointer, toWrite);
             writePointer += toWrite;
 
-            ByteBuf buf = Unpooled.buffer();
-            ByteBuf outputBuffer = processor.process(ctx, buffer, buf);
+            ByteBuf outputBuffer = Unpooled.buffer();
+            processor.process(ctx, buffer, outputBuffer);
 
             buffer.discardReadBytes();
 
