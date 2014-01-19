@@ -72,7 +72,7 @@ public class CodecLookupService {
      * Binds a codec by adding entries for it to the tables. TODO: if a dynamic opcode is registered then a static opcode tries to register, reassign dynamic. TODO: if a static opcode is registered then
      * a static opcode tries to register, throw exception
      *
-     * @param messageClazz The message's class
+     * @param message The message's class
      * @param codecClazz The codec's class.
      * @param opcode the opcode to register with, or null if the codec should be dynamic
      * @param <M> The type of message
@@ -82,7 +82,7 @@ public class CodecLookupService {
      * @throws IllegalAccessException if the codec could not be instantiated due to an access violation.
      */
     @SuppressWarnings("unchecked")
-    public <M extends Message, C extends Codec<M>> CodecRegistration bind(Class<M> message, Class<C> codecClazz, Integer opcode) throws InstantiationException, IllegalAccessException, InvocationTargetException {
+    public <M extends Message, C extends Codec<? super M>> CodecRegistration bind(Class<M> message, Class<C> codecClazz, Integer opcode) throws InstantiationException, IllegalAccessException, InvocationTargetException {
         CodecRegistration reg = codecs.get(codecClazz);
         if (reg != null) {
             return reg;

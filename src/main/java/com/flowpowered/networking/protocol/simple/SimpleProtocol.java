@@ -88,7 +88,7 @@ public abstract class SimpleProtocol extends AbstractProtocol {
         return handlerLookup.find(message);
     }
 
-    public <M extends Message, C extends Codec<M>, H extends MessageHandler<?, M>> CodecRegistration registerMessage(Class<M> message, Class<C> codec, Class<H> handler, Integer opcode) {
+    public <M extends Message, C extends Codec<? super M>, H extends MessageHandler<?, ? super M>> CodecRegistration registerMessage(Class<M> message, Class<C> codec, Class<H> handler, Integer opcode) {
         try {
             CodecRegistration bind = codecLookup.bind(message, codec, opcode);
             if (bind != null && handler != null) {

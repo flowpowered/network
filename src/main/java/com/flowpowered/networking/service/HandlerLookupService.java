@@ -31,8 +31,8 @@ import java.util.Map;
 public class HandlerLookupService {
     private final Map<Class<? extends Message>, MessageHandler<?, ?>> handlers = new HashMap<>();
 
-    public <M extends Message, H extends MessageHandler<?, ? extends M>> void bind(Class<M> clazz, Class<H> handlerClass) throws InstantiationException, IllegalAccessException {
-        MessageHandler<?, ? extends M> handler = handlerClass.newInstance();
+    public <M extends Message, H extends MessageHandler<?, ? super M>> void bind(Class<M> clazz, Class<H> handlerClass) throws InstantiationException, IllegalAccessException {
+        MessageHandler<?, ? super M> handler = handlerClass.newInstance();
         handlers.put(clazz, handler);
     }
 
