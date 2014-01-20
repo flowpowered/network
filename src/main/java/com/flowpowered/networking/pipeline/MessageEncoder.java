@@ -25,7 +25,7 @@ package com.flowpowered.networking.pipeline;
 
 import com.flowpowered.networking.Codec;
 import com.flowpowered.networking.Message;
-import com.flowpowered.networking.process.ProcessingEncoder;
+import com.flowpowered.networking.processor.ProcessingEncoder;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
@@ -34,6 +34,7 @@ import io.netty.channel.ChannelHandlerContext;
 import java.io.IOException;
 import java.util.List;
 
+import com.flowpowered.networking.processor.MessageProcessor;
 import com.flowpowered.networking.protocol.Protocol;
 
 /**
@@ -58,5 +59,10 @@ public class MessageEncoder extends ProcessingEncoder {
         final ByteBuf messageBuf = reg.getCodec().encode(ctx.alloc().buffer(), message);
         final ByteBuf headerBuf = protocol.writeHeader(reg, messageBuf, ctx.alloc().buffer());
         out.add(Unpooled.wrappedBuffer(headerBuf, messageBuf));
+    }
+
+    @Override
+    protected MessageProcessor getProcessor() {
+        return messageHandler.getSession().getProcessor();
     }
 }

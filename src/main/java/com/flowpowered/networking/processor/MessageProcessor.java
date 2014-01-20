@@ -21,24 +21,37 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.flowpowered.networking.process;
+package com.flowpowered.networking.processor;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 
 /**
- * {@code ChannelProcessor} can be used in a {@link PreprocessReplayingDecoder} or {@link ProcessingEncoder} to define
- * how a {@code ByteBuf} should be process prior to decode or encode.
+ * {@code MessageProcessor} can be used in a {@link PreprocessReplayingDecoder} or {@link ProcessingEncoder} to define
+ * how a {@code ByteBuf} should be processed prior to decode or after encode.
  */
-public interface ChannelProcessor {
+public interface MessageProcessor {
     /**
      * Adds the data contained in the given channel buffer to the processor and returns the output channel buffer. The method may be called from multiple threads.<br>
+     * This is called after {@code Codec.encode}, but before the message is sent.<br>
      * {@code input.release} should NOT be called; it is done externally.<br>
-     * {@code buffer.release} should NOT be called; it is done externally.<BR>
+     * {@code buffer.release} should NOT be called; it is done externally.<br>
      *
      * @param ctx the channel handler context
      * @param input the buffer containing the input data
      * @param buffer the buffer to add the data to; will be dynamically-sized
      */
-    public void process(ChannelHandlerContext ctx, ByteBuf input, ByteBuf buffer);
+    public void processEncode(ChannelHandlerContext ctx, ByteBuf input, ByteBuf buffer);
+
+    /**
+     * Adds the data contained in the given channel buffer to the processor and returns the output channel buffer. The method may be called from multiple threads.<br>
+     * This is called after the message arrives, but before {@code Codec.decode} is called.<br>
+     * {@code input.release} should NOT be called; it is done externally.<br>
+     * {@code buffer.release} should NOT be called; it is done externally.<br>
+     *
+     * @param ctx the channel handler context
+     * @param input the buffer containing the input data
+     * @param buffer the buffer to add the data to; will be dynamically-sized
+     */
+    public void processDecode(ChannelHandlerContext ctx, ByteBuf input, ByteBuf buffer);
 }

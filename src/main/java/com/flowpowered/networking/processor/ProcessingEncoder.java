@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.flowpowered.networking.process;
+package com.flowpowered.networking.processor;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -37,32 +37,23 @@ import com.flowpowered.networking.Message;
  * This class provides a layer of processing after encode but before the message is passed outbound.
  */
 public abstract class ProcessingEncoder extends MessageToMessageEncoder<Message> {
-    private final AtomicReference<ChannelProcessor> processor = new AtomicReference<>();
-
-    private void checkForSetupMessage(Object e) {
-        if (e instanceof ProcessorSetupMessage) {
-            ProcessorSetupMessage setupMessage = (ProcessorSetupMessage) e;
-            ChannelProcessor newProcessor = setupMessage.getProcessor();
-            processor.set(newProcessor);
-        }
-    }
-
     @Override
     protected void encode(ChannelHandlerContext ctx, final Message msg, List<Object> out) throws Exception {
         List<ByteBuf> newOut = new ArrayList<>();
         encodePreProcess(ctx, msg, newOut);
-        final ChannelProcessor processor = this.processor.get();
+        final MessageProcessor processor = getProcessor();
         for (final ByteBuf encoded : newOut) {
             ByteBuf toAdd = ctx.alloc().buffer();
             if (processor != null) {
-                processor.process(ctx, encoded, toAdd);
+                processor.processEncode(ctx, encoded, toAdd);
                 // Gotta release the old
                 encoded.release();
             }
             out.add(toAdd);
         }
-        checkForSetupMessage(msg);
     }
 
     protected abstract void encodePreProcess(ChannelHandlerContext ctx, Message msg, List<ByteBuf> out) throws Exception;
+
+    protected abstract MessageProcessor getProcessor();
 }

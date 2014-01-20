@@ -30,15 +30,15 @@ import java.util.Random;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelHandlerContext;
-import java.util.Arrays;
 
 import org.junit.Test;
 import static org.junit.Assert.assertTrue;
 
 import com.flowpowered.networking.fake.ChannelHandlerContextFaker;
 import com.flowpowered.networking.fake.FakeChannelHandlerContext;
-import com.flowpowered.networking.process.CommonChannelProcessor;
-import com.flowpowered.networking.process.PreprocessReplayingDecoder;
+import com.flowpowered.networking.processor.MessageProcessor;
+import com.flowpowered.networking.processor.PreprocessReplayingDecoder;
+import com.flowpowered.networking.processor.simple.SimpleMessageProcessor;
 
 public class PreprocessReplayingDecoderTest {
     private final int LENGTH = 65536;
@@ -111,6 +111,7 @@ public class PreprocessReplayingDecoderTest {
     }
 
     private static class Preprocessor extends PreprocessReplayingDecoder {
+        private volatile MessageProcessor processor = null;
         private final int breakPoint;
         private final int length;
         private int position = 0;
@@ -148,15 +149,20 @@ public class PreprocessReplayingDecoderTest {
             position += packetSize;
 
             if (position == breakPoint) {
-                this.setProcessor(new NegatingProcessor(512));
+                processor = new NegatingProcessor(512);
                 breakOccured = true;
             }
 
             return buf;
         }
+
+        @Override
+        protected MessageProcessor getProcessor() {
+            return processor;
+        }
     }
 
-    private static class NegatingProcessor extends CommonChannelProcessor {
+    private static class NegatingProcessor extends SimpleMessageProcessor {
         byte[] buffer = new byte[65536];
         int readPointer = 0;
         int writePointer = 0;
@@ -167,14 +173,24 @@ public class PreprocessReplayingDecoderTest {
         }
 
         @Override
-        protected void write(byte[] buf, int length) {
+        protected void writeEncode(byte[] buf, int length) {
+            throw new UnsupportedOperationException("Test not written for encode.");
+        }
+
+        @Override
+        protected int readEncode(byte[] buf) {
+            throw new UnsupportedOperationException("Test not written for encode.");
+        }
+
+        @Override
+        protected void writeDecode(byte[] buf, int length) {
             for (int i = 0; i < length; i++) {
                 buffer[(writePointer++) & mask] = (byte) ~buf[i];
             }
         }
 
         @Override
-        protected int read(byte[] buf) {
+        protected int readDecode(byte[] buf) {
             int i;
             for (i = 0; i < buf.length && readPointer < writePointer; i++) {
                 buf[i] = buffer[(readPointer++) & mask];

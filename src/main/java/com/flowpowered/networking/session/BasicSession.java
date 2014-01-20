@@ -33,6 +33,7 @@ import io.netty.channel.ChannelOption;
 
 import com.flowpowered.networking.Message;
 import com.flowpowered.networking.MessageHandler;
+import com.flowpowered.networking.processor.MessageProcessor;
 import com.flowpowered.networking.protocol.AbstractProtocol;
 
 import org.slf4j.Logger;
@@ -147,6 +148,11 @@ public class BasicSession implements Session {
 
     protected void setProtocol(AbstractProtocol protocol) {
         this.protocol = protocol;
+    }
+
+    @Override
+    public MessageProcessor getProcessor() {
+        return null;
     }
 
     /**

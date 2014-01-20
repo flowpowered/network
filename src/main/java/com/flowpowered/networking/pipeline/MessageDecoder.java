@@ -28,8 +28,9 @@ import io.netty.channel.ChannelHandlerContext;
 
 import com.flowpowered.networking.Codec;
 import com.flowpowered.networking.Message;
-import com.flowpowered.networking.process.PreprocessReplayingDecoder;
+import com.flowpowered.networking.processor.PreprocessReplayingDecoder;
 import com.flowpowered.networking.exception.UnknownPacketException;
+import com.flowpowered.networking.processor.MessageProcessor;
 import com.flowpowered.networking.protocol.Protocol;
 
 /**
@@ -65,5 +66,10 @@ public class MessageDecoder extends PreprocessReplayingDecoder {
         Message decoded = codec.decode(buf);
         buf.release();
         return decoded;
+    }
+
+    @Override
+    protected MessageProcessor getProcessor() {
+        return messageHandler.getSession().getProcessor();
     }
 }

@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.flowpowered.networking.process;
+package com.flowpowered.networking.processor;
 
 public class ReplayableException extends RuntimeException {
     private static final long serialVersionUID = 13424275234247532L;

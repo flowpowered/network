@@ -26,6 +26,7 @@ package com.flowpowered.networking.session;
 import io.netty.channel.Channel;
 
 import com.flowpowered.networking.Message;
+import com.flowpowered.networking.processor.MessageProcessor;
 import com.flowpowered.networking.protocol.Protocol;
 
 import org.slf4j.Logger;
@@ -49,6 +50,8 @@ public interface Session {
      * @return the protocol
      */
     Protocol getProtocol();
+
+    MessageProcessor getProcessor();
 
     /**
      * Sends a message across the network.

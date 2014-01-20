@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.flowpowered.networking.process;
+package com.flowpowered.networking.processor;
 
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
@@ -34,8 +34,7 @@ import io.netty.handler.codec.ByteToMessageDecoder;
  * This class is both a {@link ByteToMessageDecoder} but also allows processing pre-decode via {@code decodeProcessed}.
  *
  */
-public abstract class PreprocessReplayingDecoder extends ByteToMessageDecoder implements DecodingProcessorHandler {
-    private final AtomicReference<ChannelProcessor> processor = new AtomicReference<>(null);
+public abstract class PreprocessReplayingDecoder extends ByteToMessageDecoder {
     private final ReplayableByteBuf replayableBuffer = new ReplayableByteBuf();
     private final int capacity;
     private ByteBuf processedBuffer = null;
@@ -55,14 +54,14 @@ public abstract class PreprocessReplayingDecoder extends ByteToMessageDecoder im
         Object frame;
         ByteBuf liveBuffer;
         do {
-            ChannelProcessor processor = this.processor.get();
+            MessageProcessor processor = getProcessor();
             if (processor == null) {
                 liveBuffer = buf;
             } else {
                 if (processedBuffer == null) {
                     processedBuffer = ctx.alloc().buffer();
                 }
-                processor.process(ctx, buf, processedBuffer);
+                processor.processDecode(ctx, buf, processedBuffer);
                 liveBuffer = processedBuffer;
             }
             int readPointer = liveBuffer.readerIndex();
@@ -77,10 +76,6 @@ public abstract class PreprocessReplayingDecoder extends ByteToMessageDecoder im
 
             if (frame != null) {
                 frames.add(frame);
-                if (frame instanceof ProcessorSetupMessage) {
-                    ProcessorSetupMessage setupMessage = (ProcessorSetupMessage) frame;
-                    setupMessage.setDecodingProcessorHandler(this);
-                }
             }
         } while (frame != null);
 
@@ -105,14 +100,6 @@ public abstract class PreprocessReplayingDecoder extends ByteToMessageDecoder im
         }
     }
 
-    @Override
-    public void setProcessor(ChannelProcessor processor) {
-        if (processor == null) {
-            throw new IllegalArgumentException("Processor may not be set to null");
-        }
-        this.processor.set(processor);
-    }
-
     /**
      * This method is the equivalent of the decode method for the standard ReplayingDecoder<br> The method call is repeated if decoding causes the ByteBuf to run out of bytes<br>
      *
@@ -121,4 +108,6 @@ public abstract class PreprocessReplayingDecoder extends ByteToMessageDecoder im
      * @return the message to pass to the next stage
      */
     protected abstract Object decodeProcessed(ChannelHandlerContext ctx, ByteBuf buffer) throws Exception;
+
+    protected abstract MessageProcessor getProcessor();
 }
