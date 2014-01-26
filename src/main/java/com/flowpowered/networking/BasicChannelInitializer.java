@@ -51,6 +51,11 @@ public class BasicChannelInitializer extends ChannelInitializer<SocketChannel> {
         MessageEncoder encoder = new MessageEncoder(handler);
 
         // Left to right for encoding/sending/outbound; Right to left for decoding/receiving/inbound
-        c.pipeline().addLast(processorDecoder, processorEncoder, decoder, encoder, handler);
+        c.pipeline()
+                .addLast("processorDecoder", processorDecoder)
+                .addLast("decoder", decoder)
+                .addLast("processorEncoder", processorEncoder)
+                .addLast("encoder", encoder)
+                .addLast("handler", handler);
     }
 }
