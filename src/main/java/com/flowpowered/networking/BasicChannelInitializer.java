@@ -29,6 +29,8 @@ import io.netty.channel.socket.SocketChannel;
 import com.flowpowered.networking.pipeline.MessageDecoder;
 import com.flowpowered.networking.pipeline.MessageEncoder;
 import com.flowpowered.networking.pipeline.MessageHandler;
+import com.flowpowered.networking.pipeline.MessageProcessorDecoder;
+import com.flowpowered.networking.pipeline.MessageProcessorEncoder;
 
 /**
  * Used to initialize the channels.
@@ -43,10 +45,12 @@ public class BasicChannelInitializer extends ChannelInitializer<SocketChannel> {
     @Override
     protected final void initChannel(SocketChannel c) {
         MessageHandler handler = new MessageHandler(connectionManager);
-        MessageEncoder encoder = new MessageEncoder(handler);
+        MessageProcessorDecoder processorDecoder = new MessageProcessorDecoder(handler);
+        MessageProcessorEncoder processorEncoder = new MessageProcessorEncoder(handler);
         MessageDecoder decoder = new MessageDecoder(handler);
+        MessageEncoder encoder = new MessageEncoder(handler);
 
         // Left to right for encoding/sending/outbound; Right to left for decoding/receiving/inbound
-        c.pipeline().addLast(decoder, encoder, handler);
+        c.pipeline().addLast(processorDecoder, processorEncoder, decoder, encoder, handler);
     }
 }

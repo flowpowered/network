@@ -23,29 +23,29 @@
  */
 package com.flowpowered.networking.pipeline;
 
+import java.util.List;
+
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
+import io.netty.handler.codec.ReplayingDecoder;
 
 import com.flowpowered.networking.Codec;
 import com.flowpowered.networking.Message;
-import com.flowpowered.networking.processor.PreprocessReplayingDecoder;
 import com.flowpowered.networking.exception.UnknownPacketException;
-import com.flowpowered.networking.processor.MessageProcessor;
 import com.flowpowered.networking.protocol.Protocol;
 
 /**
  * A {@link PreprocessReplayingDecoder} which decodes {@link ByteBuf}s into Common {@link Message}s.
  */
-public class MessageDecoder extends PreprocessReplayingDecoder {
+public class MessageDecoder extends ReplayingDecoder<ByteBuf> {
     private final MessageHandler messageHandler;
 
     public MessageDecoder(final MessageHandler handler) {
-        super(512);
         this.messageHandler = handler;
     }
 
     @Override
-    protected Object decodeProcessed(ChannelHandlerContext ctx, ByteBuf buf) throws Exception {
+    protected void decode(ChannelHandlerContext ctx, ByteBuf buf ,List<Object> out) throws Exception {
         Protocol protocol = messageHandler.getSession().getProtocol();
         Codec<?> codec = null;
         try {
@@ -60,16 +60,9 @@ public class MessageDecoder extends PreprocessReplayingDecoder {
         }
 
         if (codec == null) {
-            return buf;
+            throw new UnsupportedOperationException("Protocol#readHeader cannot return null!");
         }
-
         Message decoded = codec.decode(buf);
-        buf.release();
-        return decoded;
-    }
-
-    @Override
-    protected MessageProcessor getProcessor() {
-        return messageHandler.getSession().getProcessor();
+        ctx.fireChannelRead(decoded);
     }
 }

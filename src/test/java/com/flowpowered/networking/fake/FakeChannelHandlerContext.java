@@ -27,24 +27,21 @@ import io.netty.buffer.ByteBufAllocator;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 
-import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
+
+import io.netty.buffer.ByteBuf;
 
 public abstract class FakeChannelHandlerContext implements ChannelHandlerContext {
-    private List<byte[]> list;
-    boolean first;
+    private AtomicReference<ByteBuf> ref;
 
-    public void setList(List<byte[]> list) {
-        this.list = list;
-    }
-
-    public List<byte[]> getList() {
-        return list;
+    public void setReference(AtomicReference<ByteBuf> ref) {
+        this.ref = ref;
     }
 
     @Override
     public ChannelHandlerContext fireChannelRead(Object msg) {
-        if (list != null && msg instanceof byte[]) {
-            list.add((byte[]) msg);
+        if (ref != null && msg instanceof ByteBuf) {
+            ref.set((ByteBuf) msg);
         }
         return this;
     }

@@ -36,7 +36,7 @@ public interface Protocol extends Named {
      * Read a packet header from the buffer. If a codec is not known, throw a {@link UnknownPacketException}
      *
      * @param buf The buffer to read from
-     * @return The correct codec
+     * @return The correct codec; null will throw an UnsupportedOperationException
      * @throws UnknownPacketException when the opcode does not have an associated codec
      */
     Codec<?> readHeader(ByteBuf buf) throws UnknownPacketException;

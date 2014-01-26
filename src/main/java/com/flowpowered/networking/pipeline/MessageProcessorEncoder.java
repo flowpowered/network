@@ -21,41 +21,41 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.flowpowered.networking;
+package com.flowpowered.networking.pipeline;
+
+import java.util.List;
 
 import io.netty.buffer.ByteBuf;
-import io.netty.buffer.Unpooled;
-import org.junit.Test;
+import io.netty.channel.ChannelHandlerContext;
+import io.netty.handler.codec.MessageToMessageEncoder;
 
-import static org.junit.Assert.fail;
+import com.flowpowered.networking.processor.MessageProcessor;
 
-public class ByteBufUtilsTest {
-    @Test
-    public void testVarInt() throws Exception {
-        final ByteBuf test = Unpooled.buffer();
-        ByteBufUtils.writeVarInt(test, 1);
-        final int varInt = ByteBufUtils.readVarInt(test);
-        if (varInt != 1) {
-            fail("The buffer had 1 wrote to it but received " + varInt + " instead!");
-        }
+/**
+ * This class provides a layer of processing after encode but before the message is passed outbound.
+ */
+public class MessageProcessorEncoder extends MessageToMessageEncoder<ByteBuf> {
+    private final MessageHandler messageHandler;
+
+    public MessageProcessorEncoder(final MessageHandler messageHandler) {
+        this.messageHandler = messageHandler;
     }
 
-    @Test
-    public void testUtf8() throws Exception {
-        final ByteBuf test = Unpooled.buffer();
-        ByteBufUtils.writeUTF8(test, "Hello");
-        final String utf8String = ByteBufUtils.readUTF8(test);
-        if (!"Hello".equals(utf8String)) {
-            fail("The buffer had hello wrote to it but received " + utf8String + " instead!");
+    @Override
+    protected void encode(ChannelHandlerContext ctx, final ByteBuf msg, List<Object> out) throws Exception {
+        final MessageProcessor processor = getProcessor();
+        if (processor == null) {
+            out.add(msg);
+            return;
         }
-        boolean exceptionThrown = false;
-        try {
-            ByteBufUtils.writeUTF8(test, new String(new byte[Short.MAX_VALUE + 1]));
-        } catch (Exception ignore) {
-            exceptionThrown = true;
-        }
-        if (!exceptionThrown) {
-            fail("Writing more than Short.MAX_VALUE as a UTF8 String to the ByteBuf should have thrown an exception but it did not!");
-        }
+        ByteBuf toAdd = ctx.alloc().buffer();
+        processor.processEncode(ctx, msg, toAdd);
+        // Gotta release the old
+        msg.release();
+        out.add(toAdd);
+    }
+
+    protected MessageProcessor getProcessor() {
+        return messageHandler.getSession().getProcessor();
     }
 }

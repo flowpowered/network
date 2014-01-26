@@ -23,46 +23,38 @@
  */
 package com.flowpowered.networking.pipeline;
 
-import com.flowpowered.networking.Codec;
-import com.flowpowered.networking.Message;
-import com.flowpowered.networking.processor.ProcessingEncoder;
+import java.io.IOException;
+import java.util.List;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelHandlerContext;
+import io.netty.handler.codec.MessageToMessageEncoder;
 
-import java.io.IOException;
-import java.util.List;
-
-import com.flowpowered.networking.processor.MessageProcessor;
+import com.flowpowered.networking.Codec.CodecRegistration;
+import com.flowpowered.networking.Message;
 import com.flowpowered.networking.protocol.Protocol;
 
 /**
  * A {@link MessageToMessageEncoder} which encodes into {@link ByteBuf}s.
  */
-public class MessageEncoder extends ProcessingEncoder {
+public class MessageEncoder extends MessageToMessageEncoder<Message> {
     private final MessageHandler messageHandler;
 
     public MessageEncoder(final MessageHandler messageHandler) {
         this.messageHandler = messageHandler;
     }
 
-    @SuppressWarnings("unchecked")
     @Override
-    protected void encodePreProcess(ChannelHandlerContext ctx, final Message message, List<ByteBuf> out) throws IOException {
+    protected void encode(ChannelHandlerContext ctx, Message message, List<Object> out) throws Exception {
         final Protocol protocol = messageHandler.getSession().getProtocol();
         final Class<? extends Message> clazz = message.getClass();
-        Codec.CodecRegistration reg = protocol.getCodecRegistration(message.getClass());
+        CodecRegistration reg = protocol.getCodecRegistration(message.getClass());
         if (reg == null) {
             throw new IOException("Unknown message type: " + clazz + ".");
         }
         final ByteBuf messageBuf = reg.getCodec().encode(ctx.alloc().buffer(), message);
         final ByteBuf headerBuf = protocol.writeHeader(reg, messageBuf, ctx.alloc().buffer());
         out.add(Unpooled.wrappedBuffer(headerBuf, messageBuf));
-    }
-
-    @Override
-    protected MessageProcessor getProcessor() {
-        return messageHandler.getSession().getProcessor();
     }
 }

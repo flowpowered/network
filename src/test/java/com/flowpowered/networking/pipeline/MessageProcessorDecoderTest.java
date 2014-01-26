@@ -21,15 +21,14 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.flowpowered.networking;
+package com.flowpowered.networking.pipeline;
 
 import java.util.LinkedList;
-import java.util.List;
 import java.util.Random;
+import java.util.concurrent.atomic.AtomicReference;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
-import io.netty.channel.ChannelHandlerContext;
 
 import org.junit.Test;
 import static org.junit.Assert.assertTrue;
@@ -37,10 +36,9 @@ import static org.junit.Assert.assertTrue;
 import com.flowpowered.networking.fake.ChannelHandlerContextFaker;
 import com.flowpowered.networking.fake.FakeChannelHandlerContext;
 import com.flowpowered.networking.processor.MessageProcessor;
-import com.flowpowered.networking.processor.PreprocessReplayingDecoder;
 import com.flowpowered.networking.processor.simple.SimpleMessageProcessor;
 
-public class PreprocessReplayingDecoderTest {
+public class MessageProcessorDecoderTest {
     private final int LENGTH = 65536;
     private final int BREAK = 17652;
 
@@ -49,17 +47,28 @@ public class PreprocessReplayingDecoderTest {
         // Preprocessor basically is split into two parts
         // Part 1 is just a direct copy
         // Part 2 negates all bytes before copying
-        Preprocessor p = new Preprocessor(512, BREAK, LENGTH);
+        final AtomicReference<MessageProcessor> processor = new AtomicReference<>();
+        MessageProcessorDecoder processorDecoder = new MessageProcessorDecoder(null) {
+            @Override
+            protected MessageProcessor getProcessor() {
+                return processor.get();
+            }
+        };
 
         // Set up a fake ChannelHandlerContext
         FakeChannelHandlerContext fake = ChannelHandlerContextFaker.setup();
-        fake.setList(new LinkedList<byte[]>());
+        AtomicReference<ByteBuf> ref = new AtomicReference<>();
+        fake.setReference(ref);
+        LinkedList<byte[]> outputList = new LinkedList<byte[]>();
 
         Random r = new Random();
 
         // Get some random bytes for data
         byte[] input = new byte[LENGTH];
         r.nextBytes(input);
+
+        boolean breakOccured = false;
+        int position = 0;
 
         for (int i = 0; i < input.length;) {
             // Simulate real data read
@@ -74,6 +83,11 @@ public class PreprocessReplayingDecoderTest {
                 burstSize = input.length - i;
             }
 
+            // And we can't negate in the middle of a burst
+            if (i + burstSize > BREAK && !breakOccured) {
+                burstSize = BREAK - i;
+            }
+
             // Write info to a new ByteBuf
             final ByteBuf buf = Unpooled.buffer(burstSize);
             buf.retain();
@@ -81,11 +95,45 @@ public class PreprocessReplayingDecoderTest {
             i += burstSize;
 
             // Fake a read
-            p.channelRead(fake, buf);
+            processorDecoder.channelRead(fake, buf);
+
+            final ByteBuf returned = ref.get();
+
+            while (returned != null && true) {
+                int packetSize = r.nextInt(128) + 1;
+                if (r.nextInt(10) == 0) {
+                    packetSize *= 20;
+                }
+
+                if (packetSize > returned.readableBytes()) {
+                    packetSize = returned.readableBytes();
+                }
+                if (position + packetSize > BREAK && !breakOccured) {
+                    packetSize = BREAK - position;
+                }
+                if (position + packetSize > LENGTH) {
+                    packetSize = LENGTH - position;
+                }
+
+                if (packetSize == 0) {
+                    break;
+                }
+
+                byte[] array = new byte[packetSize];
+
+                returned.readBytes(array);
+                position += packetSize;
+
+                if (position == BREAK) {
+                    processor.set(new NegatingProcessor(512));
+                    breakOccured = true;
+                }
+                outputList.add(array);
+            }
         }
 
+
         // Get the output data and combine into one array
-        List<byte[]> outputList = fake.getList();
         byte[] output = new byte[LENGTH];
         int i = 0;
         for (byte[] array : outputList) {
@@ -97,68 +145,16 @@ public class PreprocessReplayingDecoderTest {
         for (i = 0; i < input.length; i++) {
             byte expected = i < BREAK ? input[i] : (byte) ~input[i];
             if (output[i] != expected) {
-                for (int j = i - 10; j <= i + 10; j++) {
-                    //System.out.println(j + ") " + Integer.toBinaryString(input[j] & 0xFF) + " " + Integer.toBinaryString(output[j] & 0xFF));
+                for (int j = Math.max(0, i - 10); j <= i + 10; j++) {
+                    System.out.println(j + ") " + Integer.toBinaryString(j < BREAK ? input[j] : (byte) ~input[j]) + " " + Integer.toBinaryString(output[j]));
                 }
             }
 
             if (i < BREAK) {
-                assertTrue("Input/Output mismatch at position " + i, output[i] == input[i]);
+                assertTrue("Input/Output mismatch at position " + i + ". Expected " + input[i] + " but got " + output[i] + ". Break is: " + BREAK, output[i] == input[i]);
             } else {
-                assertTrue("Input/Output mismatch at position " + i + ", after the processor change", output[i] == (byte) ~input[i]);
+                assertTrue("Input/Output mismatch at position " + i + ", after the processor change. Expected " + (byte) ~input[i] + " but got " + output[i] + ". Break is: " + BREAK, output[i] == (byte) ~input[i]);
             }
-        }
-    }
-
-    private static class Preprocessor extends PreprocessReplayingDecoder {
-        private volatile MessageProcessor processor = null;
-        private final int breakPoint;
-        private final int length;
-        private int position = 0;
-        private boolean breakOccured;
-        private Random r = new Random();
-
-        public Preprocessor(int capacity, int breakPoint, int length) {
-            super(capacity);
-            this.breakPoint = breakPoint;
-            this.length = length;
-        }
-
-        @Override
-        public Object decodeProcessed(ChannelHandlerContext ctx, ByteBuf buffer) throws Exception {
-            int packetSize = r.nextInt(128) + 1;
-            if (r.nextInt(10) == 0) {
-                packetSize *= 20;
-            }
-
-            if (position + packetSize > breakPoint && !breakOccured) {
-                packetSize = breakPoint - position;
-            }
-            if (position + packetSize > length) {
-                packetSize = length - position;
-            }
-
-            if (packetSize == 0) {
-                return null;
-            }
-
-            byte[] buf = new byte[packetSize];
-
-            buffer.readBytes(buf);
-
-            position += packetSize;
-
-            if (position == breakPoint) {
-                processor = new NegatingProcessor(512);
-                breakOccured = true;
-            }
-
-            return buf;
-        }
-
-        @Override
-        protected MessageProcessor getProcessor() {
-            return processor;
         }
     }
 

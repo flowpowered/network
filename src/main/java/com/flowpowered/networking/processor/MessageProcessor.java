@@ -45,6 +45,7 @@ public interface MessageProcessor {
 
     /**
      * Adds the data contained in the given channel buffer to the processor and returns the output channel buffer. The method may be called from multiple threads.<br>
+     * This should read as much data from {@code input} as possible. It does not replay.<br>
      * This is called after the message arrives, but before {@code Codec.decode} is called.<br>
      * {@code input.release} should NOT be called; it is done externally.<br>
      * {@code buffer.release} should NOT be called; it is done externally.<br>

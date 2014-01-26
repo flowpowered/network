@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.flowpowered.networking;
+package com.flowpowered.networking.util;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;

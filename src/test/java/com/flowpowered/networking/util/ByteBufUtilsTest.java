@@ -21,39 +21,41 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.flowpowered.networking.processor;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.atomic.AtomicReference;
+package com.flowpowered.networking.util;
 
 import io.netty.buffer.ByteBuf;
-import io.netty.channel.ChannelHandlerContext;
-import io.netty.handler.codec.MessageToMessageEncoder;
+import io.netty.buffer.Unpooled;
+import org.junit.Test;
 
-import com.flowpowered.networking.Message;
+import static org.junit.Assert.fail;
 
-/**
- * This class provides a layer of processing after encode but before the message is passed outbound.
- */
-public abstract class ProcessingEncoder extends MessageToMessageEncoder<Message> {
-    @Override
-    protected void encode(ChannelHandlerContext ctx, final Message msg, List<Object> out) throws Exception {
-        List<ByteBuf> newOut = new ArrayList<>();
-        encodePreProcess(ctx, msg, newOut);
-        final MessageProcessor processor = getProcessor();
-        for (final ByteBuf encoded : newOut) {
-            ByteBuf toAdd = ctx.alloc().buffer();
-            if (processor != null) {
-                processor.processEncode(ctx, encoded, toAdd);
-                // Gotta release the old
-                encoded.release();
-            }
-            out.add(toAdd);
+public class ByteBufUtilsTest {
+    @Test
+    public void testVarInt() throws Exception {
+        final ByteBuf test = Unpooled.buffer();
+        ByteBufUtils.writeVarInt(test, 1);
+        final int varInt = ByteBufUtils.readVarInt(test);
+        if (varInt != 1) {
+            fail("The buffer had 1 wrote to it but received " + varInt + " instead!");
         }
     }
 
-    protected abstract void encodePreProcess(ChannelHandlerContext ctx, Message msg, List<ByteBuf> out) throws Exception;
-
-    protected abstract MessageProcessor getProcessor();
+    @Test
+    public void testUtf8() throws Exception {
+        final ByteBuf test = Unpooled.buffer();
+        ByteBufUtils.writeUTF8(test, "Hello");
+        final String utf8String = ByteBufUtils.readUTF8(test);
+        if (!"Hello".equals(utf8String)) {
+            fail("The buffer had hello wrote to it but received " + utf8String + " instead!");
+        }
+        boolean exceptionThrown = false;
+        try {
+            ByteBufUtils.writeUTF8(test, new String(new byte[Short.MAX_VALUE + 1]));
+        } catch (Exception ignore) {
+            exceptionThrown = true;
+        }
+        if (!exceptionThrown) {
+            fail("Writing more than Short.MAX_VALUE as a UTF8 String to the ByteBuf should have thrown an exception but it did not!");
+        }
+    }
 }

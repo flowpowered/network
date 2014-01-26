@@ -21,16 +21,39 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.flowpowered.networking.processor;
+package com.flowpowered.networking.pipeline;
 
-public class ReplayableException extends RuntimeException {
-    private static final long serialVersionUID = 13424275234247532L;
+import java.util.List;
 
-    public ReplayableException(String message) {
-        super(message);
+import com.flowpowered.networking.processor.MessageProcessor;
+
+import io.netty.buffer.ByteBuf;
+import io.netty.channel.ChannelHandlerContext;
+import io.netty.handler.codec.ByteToMessageDecoder;
+
+public class MessageProcessorDecoder extends ByteToMessageDecoder {
+    private final MessageHandler messageHandler;
+
+    public MessageProcessorDecoder(final MessageHandler messageHandler) {
+        this.messageHandler = messageHandler;
     }
 
-    public ReplayableException(String message, Throwable cause) {
-        super(message, cause);
+    @Override
+    protected void decode(ChannelHandlerContext ctx, ByteBuf buf, List<Object> frames) throws Exception {
+        MessageProcessor processor = getProcessor();
+        if (processor == null) {
+            int length = buf.writerIndex() - buf.readerIndex();
+            ByteBuf newBuf = buf.readBytes(length);
+            frames.add(newBuf);
+            return;
+        }
+        // Eventually, we will run out of bytes and a ReplayableError will be called
+        ByteBuf liveBuffer = ctx.alloc().buffer();
+        processor.processDecode(ctx, buf, liveBuffer);
+        frames.add(liveBuffer);
+    }
+
+    protected MessageProcessor getProcessor() {
+        return messageHandler.getSession().getProcessor();
     }
 }
