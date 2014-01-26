@@ -10,6 +10,7 @@ build
 dist
 lib
 out
+run
 target
 *.com
 *.class
@@ -28,10 +29,13 @@ target
 ############
 *.7z
 *.dmg
+*.ear
 *.gz
 *.iso
+*.jar
 *.rar
 *.tar
+*.war
 *.zip
 
 # Repository #
@@ -46,6 +50,7 @@ target
 # Misc #
 ########
 *.bak
+*.tmp
 
 # System #
 ##########
@@ -55,7 +60,9 @@ Thumbs.db
 
 # Project #
 ###########
+.buildpath
 .classpath
+.cproject
 .externalToolBuilders
 .gradle
 .idea
@@ -68,3 +75,6 @@ nb-configuration.xml
 *.iml
 *.ipr
 *.iws
+*.launch
+*.pydevproject
+
