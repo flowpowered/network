@@ -49,9 +49,8 @@ public class MessageProcessorEncoder extends MessageToMessageEncoder<ByteBuf> {
             return;
         }
         ByteBuf toAdd = ctx.alloc().buffer();
+        toAdd.retain();
         processor.processEncode(ctx, msg, toAdd);
-        // Gotta release the old
-        msg.release();
         out.add(toAdd);
     }
 

@@ -49,6 +49,7 @@ public class MessageProcessorDecoder extends ByteToMessageDecoder {
         }
         // Eventually, we will run out of bytes and a ReplayableError will be called
         ByteBuf liveBuffer = ctx.alloc().buffer();
+        liveBuffer.retain();
         processor.processDecode(ctx, buf, liveBuffer);
         frames.add(liveBuffer);
     }

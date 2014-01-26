@@ -53,10 +53,9 @@ public interface Protocol extends Named {
     /**
      * Writes a packet header to a new buffer.
      *
+     * @param header the buffer which to write the header to
      * @param codec The codec the message was written with
      * @param data The data from the encoded message
-     * @param header the buffer which to write the header to
-     * @return The buffer with the packet header
      */
-    ByteBuf writeHeader(CodecRegistration codec, ByteBuf data, ByteBuf header);
+    void writeHeader(ByteBuf header, CodecRegistration codec, ByteBuf data);
 }
