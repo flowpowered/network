@@ -35,6 +35,8 @@ import com.flowpowered.networking.Message;
 import com.flowpowered.networking.MessageHandler;
 import com.flowpowered.networking.processor.MessageProcessor;
 import com.flowpowered.networking.protocol.AbstractProtocol;
+import io.netty.channel.ChannelFuture;
+import io.netty.channel.ChannelPromise;
 
 import org.slf4j.Logger;
 
@@ -88,17 +90,22 @@ public class BasicSession implements Session {
         }
     }
 
-    @Override
-    public void send(Message message) {
+    public ChannelFuture sendWithFuture(Message message) {
         if (!channel.isActive()) {
             throw new IllegalStateException("Trying to send a message when a session is inactive!");
         }
         try {
-            channel.writeAndFlush(message);
+            return channel.writeAndFlush(message);
         } catch (Exception e) {
             protocol.getLogger().error("Exception when trying to send message, disconnecting.", e);
             disconnect();
         }
+        return null;
+    }
+
+    @Override
+    public void send(Message message) {
+        sendWithFuture(message);
     }
 
     @Override
