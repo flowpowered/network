@@ -49,7 +49,7 @@ public abstract class SimpleMessageProcessor implements MessageProcessor {
             input.readBytes(encodingByteBuffer, 0, clamped);
             writeEncode(encodingByteBuffer, clamped);
             int read;
-            while ((read = readDecode(encodingByteBuffer)) > 0) {
+            while ((read = readEncode(encodingByteBuffer)) > 0) {
                 buffer.writeBytes(encodingByteBuffer, 0, read);
             }
         }
