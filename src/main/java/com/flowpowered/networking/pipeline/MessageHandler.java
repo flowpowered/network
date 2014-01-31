@@ -69,7 +69,6 @@ public class MessageHandler extends SimpleChannelInboundHandler<Message> {
         session.validate(c);
         session.onDisconnect();
         connectionManager.sessionInactivated(session);
-        getLogger().info("Channel disconnected: " + c + ".");
     }
 
     @Override
@@ -81,7 +80,7 @@ public class MessageHandler extends SimpleChannelInboundHandler<Message> {
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
-        session.get().onThrowable(cause);
+        session.get().onInboundThrowable(cause);
     }
 
     public Session getSession() {

@@ -51,7 +51,7 @@ public class MessageEncoder extends MessageToMessageEncoder<Message> {
         final Class<? extends Message> clazz = message.getClass();
         CodecRegistration reg = protocol.getCodecRegistration(message.getClass());
         if (reg == null) {
-            throw new IOException("Unknown message type: " + clazz + ".");
+            throw new Exception("Unknown message type: " + clazz + ".");
         }
         final ByteBuf messageBuf = ctx.alloc().buffer();
         reg.getCodec().encode(messageBuf, message);

@@ -86,11 +86,11 @@ public interface Session {
     void onReady();
 
     /**
-     * Called when a throwable is thrown in the pipeline.
+     * Called when a throwable is thrown in the pipeline during inbound operations.
      *
      * @param throwable 
      */
-    void onThrowable(Throwable throwable);
+    void onInboundThrowable(Throwable throwable);
 
     /**
      * Validates that {@code c} is the channel of the session.  The channel of a session never changes.

@@ -43,10 +43,6 @@ public class CodecLookupService {
      */
     private final ConcurrentMap<Class<? extends Message>, CodecRegistration> messages;
     /**
-     * A lookup table for the Message classes mapped to their Codec.
-     */
-    private final ConcurrentMap<Class<? extends Codec<?>>, CodecRegistration> codecs;
-    /**
      * Lookup table for opcodes mapped to their codecs.
      */
     private final CodecRegistration[] opcodeTable;
@@ -58,12 +54,10 @@ public class CodecLookupService {
     /**
      * The {@link CodecLookupService} stores the codecs available in the protocol. Codecs can be found using either the class of the message they represent or their message's opcode.
      *
-     * @param dynamicPacketMap - The dynamic opcode map
      * @param size The maximum number of message types
      */
     public CodecLookupService(int size) {
         messages = new ConcurrentHashMap<>(size, 1.0f);
-        codecs = new ConcurrentHashMap<>(size, 1.0f);
         opcodeTable = new CodecRegistration[size];
         nextId = new AtomicInteger(0);
     }
@@ -72,7 +66,7 @@ public class CodecLookupService {
      * Binds a codec by adding entries for it to the tables. TODO: if a dynamic opcode is registered then a static opcode tries to register, reassign dynamic. TODO: if a static opcode is registered then
      * a static opcode tries to register, throw exception
      *
-     * @param message The message's class
+     * @param messageClazz The message's class
      * @param codecClazz The codec's class.
      * @param opcode the opcode to register with, or null if the codec should be dynamic
      * @param <M> The type of message
@@ -82,8 +76,8 @@ public class CodecLookupService {
      * @throws IllegalAccessException if the codec could not be instantiated due to an access violation.
      */
     @SuppressWarnings("unchecked")
-    public <M extends Message, C extends Codec<? super M>> CodecRegistration bind(Class<M> message, Class<C> codecClazz, Integer opcode) throws InstantiationException, IllegalAccessException, InvocationTargetException {
-        CodecRegistration reg = codecs.get(codecClazz);
+    public <M extends Message, C extends Codec<? super M>> CodecRegistration bind(Class<M> messageClazz, Class<C> codecClazz, Integer opcode) throws InstantiationException, IllegalAccessException, InvocationTargetException {
+        CodecRegistration reg = messages.get(messageClazz);
         if (reg != null) {
             return reg;
         }
@@ -116,8 +110,7 @@ public class CodecLookupService {
         }
         reg = new CodecRegistration(opcode, codec);
         opcodeTable[opcode] = reg;
-        messages.put(message, reg);
-        codecs.put(codecClazz, reg);
+        messages.put(messageClazz, reg);
         return reg;
     }
 
@@ -142,7 +135,7 @@ public class CodecLookupService {
      * Finds a codec by message class.
      *
      * @param clazz The message class.
-     * @param <T> The type of message.
+     * @param <M> The type of message.
      * @return The codec, or {@code null} if it could not be found.
      */
     @SuppressWarnings("unchecked")

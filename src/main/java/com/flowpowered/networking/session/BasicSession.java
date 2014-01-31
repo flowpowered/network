@@ -29,14 +29,16 @@ import java.util.Random;
 import java.util.concurrent.atomic.AtomicReference;
 
 import io.netty.channel.Channel;
+import io.netty.channel.ChannelFuture;
+import io.netty.util.concurrent.Future;
+import io.netty.util.concurrent.GenericFutureListener;
+
 import io.netty.channel.ChannelOption;
 
 import com.flowpowered.networking.Message;
 import com.flowpowered.networking.MessageHandler;
 import com.flowpowered.networking.processor.MessageProcessor;
 import com.flowpowered.networking.protocol.AbstractProtocol;
-import io.netty.channel.ChannelFuture;
-import io.netty.channel.ChannelPromise;
 
 import org.slf4j.Logger;
 
@@ -95,7 +97,14 @@ public class BasicSession implements Session {
             throw new IllegalStateException("Trying to send a message when a session is inactive!");
         }
         try {
-            return channel.writeAndFlush(message);
+            return channel.writeAndFlush(message).addListener(new GenericFutureListener<Future<? super Void>>() {
+                @Override
+                public void operationComplete(Future<? super Void> future) throws Exception {
+                    if (future.cause() != null) {
+                        onOutboundThrowable(future.cause());
+                    }
+                }
+            });
         } catch (Exception e) {
             protocol.getLogger().error("Exception when trying to send message, disconnecting.", e);
             disconnect();
@@ -219,7 +228,10 @@ public class BasicSession implements Session {
     }
 
     @Override
-    public void onThrowable(Throwable throwable) {
+    public void onInboundThrowable(Throwable throwable) {
+    }
+
+    public void onOutboundThrowable(Throwable throwable) {
     }
 
     public <T> void setOption(ChannelOption<T> option, T value) {
