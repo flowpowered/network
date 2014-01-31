@@ -62,10 +62,6 @@ public class BasicSession implements Session {
      * The protocol for this session
      */
     private AbstractProtocol protocol;
-    /**
-     * Default uncaught exception handler
-     */
-    private final AtomicReference<UncaughtExceptionHandler> exceptionHandler;
 
     /**
      * Creates a new session.
@@ -76,7 +72,6 @@ public class BasicSession implements Session {
     public BasicSession(Channel channel, AbstractProtocol bootstrapProtocol) {
         this.channel = channel;
         this.protocol = bootstrapProtocol;
-        this.exceptionHandler = new AtomicReference<UncaughtExceptionHandler>(new DefaultUncaughtExceptionHandler(this));
     }
 
     @SuppressWarnings("unchecked")
@@ -86,8 +81,8 @@ public class BasicSession implements Session {
         if (handler != null) {
             try {
                 handler.handle(this, message);
-            } catch (Exception e) {
-                exceptionHandler.get().uncaughtException(message, handler, e);
+            } catch (Throwable t) {
+                onHandlerThrowable(message, handler, t);
             }
         }
     }
@@ -96,20 +91,14 @@ public class BasicSession implements Session {
         if (!channel.isActive()) {
             throw new IllegalStateException("Trying to send a message when a session is inactive!");
         }
-        try {
-            return channel.writeAndFlush(message).addListener(new GenericFutureListener<Future<? super Void>>() {
-                @Override
-                public void operationComplete(Future<? super Void> future) throws Exception {
-                    if (future.cause() != null) {
-                        onOutboundThrowable(future.cause());
-                    }
+        return channel.writeAndFlush(message).addListener(new GenericFutureListener<Future<? super Void>>() {
+            @Override
+            public void operationComplete(Future<? super Void> future) throws Exception {
+                if (future.cause() != null) {
+                    onOutboundThrowable(future.cause());
                 }
-            });
-        } catch (Exception e) {
-            protocol.getLogger().error("Exception when trying to send message, disconnecting.", e);
-            disconnect();
-        }
-        return null;
+            }
+        });
     }
 
     @Override
@@ -187,29 +176,6 @@ public class BasicSession implements Session {
         }
     }
 
-    /**
-     * Gets the uncaught exception handler.
-     *
-     * <p>Note: the default exception handler is the {@link DefaultUncaughtExceptionHandler}.</p>
-     *
-     * @return exception handler
-     */
-    public UncaughtExceptionHandler getUncaughtExceptionHandler() {
-        return exceptionHandler.get();
-    }
-
-    /**
-     * Sets the uncaught exception handler to be used for this session. Null values are not permitted.
-     *
-     * <p>Note: to reset the default exception handler, use the{@link DefaultUncaughtExceptionHandler}.</p>
-     */
-    public void setUncaughtExceptionHandler(UncaughtExceptionHandler handler) {
-        if (handler == null) {
-            throw new IllegalArgumentException("Null uncaught exception handlers are not permitted");
-        }
-        exceptionHandler.set(handler);
-    }
-
     public Channel getChannel() {
         return channel;
     }
@@ -234,6 +200,16 @@ public class BasicSession implements Session {
     public void onOutboundThrowable(Throwable throwable) {
     }
 
+    /**
+     * Called when an exception occurs during session handling
+     *
+     * @param message the message handler threw an exception on
+     * @param handle handler that threw the an exception handling the message
+     * @param throwable the throwable
+     */
+    public void onHandlerThrowable(Message message, MessageHandler<?,?> handle, Throwable throwable) {
+    }
+
     public <T> void setOption(ChannelOption<T> option, T value) {
         channel.config().setOption(option, value);
     }
@@ -241,31 +217,5 @@ public class BasicSession implements Session {
     @Override
     public Logger getLogger() {
         return protocol.getLogger();
-    }
-
-    public interface UncaughtExceptionHandler {
-        /**
-         * Called when an exception occurs during session handling
-         *
-         * @param message the message handler threw an exception on
-         * @param handle handler that threw the an exception handling the message
-         * @param ex the exception
-         */
-        public void uncaughtException(Message message, MessageHandler<?,?> handle, Exception ex);
-    }
-
-    public static final class DefaultUncaughtExceptionHandler implements UncaughtExceptionHandler {
-        private final Session session;
-
-        public DefaultUncaughtExceptionHandler(Session session) {
-            this.session = session;
-        }
-
-        @Override
-        public void uncaughtException(Message message, MessageHandler<?,?> handle, Exception ex) {
-             // TODO: Use parametrized message instead of string concatation
-            session.getLogger().error("Message handler for " + message.getClass().getSimpleName() + " threw exception", ex);
-            session.disconnect();
-        }
     }
 }
