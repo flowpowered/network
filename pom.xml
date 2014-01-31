@@ -107,10 +107,9 @@
     <dependencies>
         <!-- Include in final JAR -->
         <dependency>
-            <groupId>com.flowpowered</groupId>
-            <artifactId>flow-commons</artifactId>
-            <version>0.1.0-SNAPSHOT</version>
-            <scope>compile</scope>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <version>1.7.5</version>
         </dependency>
         <dependency>
             <groupId>io.netty</groupId>
@@ -247,6 +246,13 @@
                     <execution>
                         <configuration>
                             <minimizeJar>true</minimizeJar>
+                            <artifactSet>
+                                <includes>
+                                    <include>com.flowpowered:flow-networking</include>
+                                    <include>io.netty:*</include>
+                                    <include>org.slf4j:*</include>
+                                </includes>
+                            </artifactSet>
                             <filters>
                                 <filter>
                                     <artifact>*:*</artifact>
@@ -260,12 +266,6 @@
                                         <exclude>**/DEPENDENCIES</exclude>
                                         <exclude>**/*.java</exclude>
                                     </excludes>
-                                </filter>
-                                <filter>
-                                    <artifact>com.flowpowered:*</artifact>
-                                    <includes>
-                                        <include>**</include>
-                                    </includes>
                                 </filter>
                             </filters>
                         </configuration>

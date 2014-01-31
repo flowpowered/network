@@ -23,7 +23,6 @@
  */
 package com.flowpowered.networking.protocol;
 
-import com.flowpowered.commons.Named;
 import com.flowpowered.networking.Codec;
 import com.flowpowered.networking.Codec.CodecRegistration;
 import com.flowpowered.networking.Message;
@@ -31,7 +30,13 @@ import com.flowpowered.networking.exception.UnknownPacketException;
 
 import io.netty.buffer.ByteBuf;
 
-public interface Protocol extends Named {
+public interface Protocol {
+
+    /**
+     * @return the name of this Protocol
+     */
+    String getName();
+
     /**
      * Read a packet header from the buffer. If a codec is not known, throw a {@link UnknownPacketException}
      *
