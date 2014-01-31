@@ -26,7 +26,6 @@ package com.flowpowered.networking.pipeline;
 import java.util.List;
 
 import io.netty.buffer.ByteBuf;
-import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.MessageToMessageEncoder;
 
@@ -46,7 +45,7 @@ public class MessageProcessorEncoder extends MessageToMessageEncoder<ByteBuf> {
     protected void encode(ChannelHandlerContext ctx, final ByteBuf buf, List<Object> out) throws Exception {
         final MessageProcessor processor = getProcessor();
         if (processor == null) {
-            out.add(Unpooled.copiedBuffer(buf).retain());
+            out.add(buf.readBytes(buf.readableBytes()).retain());
             return;
         }
         ByteBuf toAdd = ctx.alloc().buffer().retain();

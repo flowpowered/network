@@ -28,7 +28,6 @@ import java.util.List;
 import com.flowpowered.networking.processor.MessageProcessor;
 
 import io.netty.buffer.ByteBuf;
-import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.ByteToMessageDecoder;
 
@@ -43,7 +42,7 @@ public class MessageProcessorDecoder extends ByteToMessageDecoder {
     protected void decode(ChannelHandlerContext ctx, ByteBuf buf, List<Object> frames) throws Exception {
         MessageProcessor processor = getProcessor();
         if (processor == null) {
-            frames.add(Unpooled.copiedBuffer(buf).retain());
+            frames.add(buf.readBytes(buf.readableBytes()).retain());
             return;
         }
         // Eventually, we will run out of bytes and a ReplayableError will be called
