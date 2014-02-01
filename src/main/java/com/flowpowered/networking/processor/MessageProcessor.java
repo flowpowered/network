@@ -40,8 +40,9 @@ public interface MessageProcessor {
      * @param ctx the channel handler context
      * @param input the buffer containing the input data
      * @param buffer the buffer to add the data to; will be dynamically-sized
+     * @return the processed outbound ByteBuf
      */
-    public void processEncode(ChannelHandlerContext ctx, ByteBuf input, ByteBuf buffer);
+    public ByteBuf processOutbound(ChannelHandlerContext ctx, ByteBuf input, ByteBuf buffer);
 
     /**
      * Adds the data contained in the given channel buffer to the processor and returns the output channel buffer. The method may be called from multiple threads.<br>
@@ -53,6 +54,7 @@ public interface MessageProcessor {
      * @param ctx the channel handler context
      * @param input the buffer containing the input data
      * @param buffer the buffer to add the data to; will be dynamically-sized
+     * @return the processed inbound buffer
      */
-    public void processDecode(ChannelHandlerContext ctx, ByteBuf input, ByteBuf buffer);
+    public ByteBuf processInbound(ChannelHandlerContext ctx, ByteBuf input, ByteBuf buffer);
 }

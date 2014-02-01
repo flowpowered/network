@@ -42,7 +42,7 @@ public abstract class SimpleMessageProcessor implements MessageProcessor {
     }
 
     @Override
-    public final synchronized void processEncode(ChannelHandlerContext ctx, final ByteBuf input, ByteBuf buffer) {
+    public final synchronized ByteBuf processOutbound(ChannelHandlerContext ctx, final ByteBuf input, ByteBuf buffer) {
         int remaining;
         while ((remaining = input.readableBytes()) > 0) {
             int clamped = Math.min(remaining, capacity);
@@ -53,6 +53,7 @@ public abstract class SimpleMessageProcessor implements MessageProcessor {
                 buffer.writeBytes(encodingByteBuffer, 0, read);
             }
         }
+        return buffer;
     }
 
     /**
@@ -72,7 +73,7 @@ public abstract class SimpleMessageProcessor implements MessageProcessor {
     protected abstract int readEncode(byte[] buf);
 
     @Override
-    public final synchronized void processDecode(ChannelHandlerContext ctx, final ByteBuf input, ByteBuf buffer) {
+    public final synchronized ByteBuf processInbound(ChannelHandlerContext ctx, final ByteBuf input, ByteBuf buffer) {
         int remaining;
         while ((remaining = input.readableBytes()) > 0) {
             int clamped = Math.min(remaining, capacity);
@@ -83,6 +84,7 @@ public abstract class SimpleMessageProcessor implements MessageProcessor {
                 buffer.writeBytes(decodingByteBuffer, 0, read);
             }
         }
+        return buffer;
     }
 
     /**

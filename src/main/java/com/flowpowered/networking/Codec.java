@@ -47,7 +47,7 @@ public interface Codec<T extends Message> {
      * @param message The message to encode
      * @throws IOException If any data on the message fails to encode
      */
-    void encode(ByteBuf buf, T message) throws IOException;
+    ByteBuf encode(ByteBuf buf, T message) throws IOException;
 
     public static class CodecRegistration {
         private final int opcode;
