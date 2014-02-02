@@ -42,21 +42,20 @@ public abstract class SimpleProtocol extends AbstractProtocol {
     private final CodecLookupService codecLookup;
     private final HandlerLookupService handlerLookup;
 
-    public SimpleProtocol(String name, int defaultPort, int maxPackets) {
+    public SimpleProtocol(String name, int defaultPort) {
         super(name, defaultPort);
-        codecLookup = new CodecLookupService(maxPackets);
+        codecLookup = new CodecLookupService();
         handlerLookup = new HandlerLookupService();
     }
 
     /**
      * @param name
      * @param defaultPort
-     * @param maxPackets this is one more than the maximum packet id
      * @param logger
      */
-    public SimpleProtocol(String name, int defaultPort, int maxPackets, Logger logger) {
+    public SimpleProtocol(String name, int defaultPort, Logger logger) {
         super(name, defaultPort, logger);
-        codecLookup = new CodecLookupService(maxPackets);
+        codecLookup = new CodecLookupService();
         handlerLookup = new HandlerLookupService();
     }
 

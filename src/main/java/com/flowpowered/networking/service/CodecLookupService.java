@@ -45,7 +45,7 @@ public class CodecLookupService {
     /**
      * Lookup table for opcodes mapped to their codecs.
      */
-    private final Codec[] opcodeTable;
+    private final ConcurrentMap<Integer, Codec> opcodes;
     /**
      * Stores the next opcode available.
      */
@@ -56,9 +56,9 @@ public class CodecLookupService {
      *
      * @param size The maximum number of message types
      */
-    public CodecLookupService(int size) {
-        messages = new ConcurrentHashMap<>(size, 1.0f);
-        opcodeTable = new Codec[size];
+    public CodecLookupService() {
+        messages = new ConcurrentHashMap<>();
+        opcodes = new ConcurrentHashMap<>();
         nextId = new AtomicInteger(0);
     }
 
@@ -98,17 +98,17 @@ public class CodecLookupService {
             try {
                 do {
                     id = nextId.getAndIncrement();
-                } while (opcodeTable[id] != null);
+                } while (opcodes.get(id) != null);
             } catch (IndexOutOfBoundsException ioobe) {
                 throw new IllegalStateException("Ran out of Ids!", ioobe);
             }
             opcode = id;
         }
-        if (opcodeTable[opcode] != null && opcodeTable[opcode].getClass() != codecClazz) {
+        if (opcodes.get(opcode) != null && opcodes.get(opcode).getClass() != codecClazz) {
             throw new IllegalStateException("Trying to bind an opcode where one already exists. New: " + codecClazz.getSimpleName() + " Old: " + reg.getCodec().getClass().getSimpleName());
         }
         reg = new CodecRegistration(opcode, codec);
-        opcodeTable[opcode] = codec;
+        opcodes.put(opcode, codec);
         messages.put(messageClazz, reg);
         return reg;
     }
@@ -120,10 +120,7 @@ public class CodecLookupService {
      * @return The codec, null if not found.
      */
     public Codec<?> find(int opcode) throws IllegalOpcodeException {
-        if (opcode < 0 || opcode >= opcodeTable.length) {
-            throw new IllegalOpcodeException("Opcode " + opcode + " is out of bounds");
-        }
-        Codec<?> c = opcodeTable[opcode];
+        Codec<?> c = opcodes.get(opcode);
         if (c == null) {
             throw new IllegalOpcodeException("Opcode " + opcode + " is not bound!");
         }
