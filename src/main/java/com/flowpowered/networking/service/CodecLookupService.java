@@ -45,7 +45,7 @@ public class CodecLookupService {
     /**
      * Lookup table for opcodes mapped to their codecs.
      */
-    private final CodecRegistration[] opcodeTable;
+    private final Codec[] opcodeTable;
     /**
      * Stores the next opcode available.
      */
@@ -58,7 +58,7 @@ public class CodecLookupService {
      */
     public CodecLookupService(int size) {
         messages = new ConcurrentHashMap<>(size, 1.0f);
-        opcodeTable = new CodecRegistration[size];
+        opcodeTable = new Codec[size];
         nextId = new AtomicInteger(0);
     }
 
@@ -93,10 +93,6 @@ public class CodecLookupService {
             if (opcode < 0) {
                 throw new IllegalArgumentException("Opcode must either be null or greater than or equal to 0!");
             }
-            final CodecRegistration prevCodec = opcodeTable[opcode];
-            if (prevCodec != null) {
-                throw new IllegalStateException("Trying to bind a static opcode where one already exists. Static: " + codecClazz.getSimpleName() + " Other: " + prevCodec.getCodec().getClass().getSimpleName());
-            }
         } else {
             int id;
             try {
@@ -108,8 +104,11 @@ public class CodecLookupService {
             }
             opcode = id;
         }
+        if (opcodeTable[opcode] != null && opcodeTable[opcode].getClass() != codecClazz) {
+            throw new IllegalStateException("Trying to bind an opcode where one already exists. New: " + codecClazz.getSimpleName() + " Old: " + reg.getCodec().getClass().getSimpleName());
+        }
         reg = new CodecRegistration(opcode, codec);
-        opcodeTable[opcode] = reg;
+        opcodeTable[opcode] = codec;
         messages.put(messageClazz, reg);
         return reg;
     }
@@ -120,11 +119,11 @@ public class CodecLookupService {
      * @param opcode The opcode which the codec uses
      * @return The codec, null if not found.
      */
-    public CodecRegistration find(int opcode) throws IllegalOpcodeException {
+    public Codec<?> find(int opcode) throws IllegalOpcodeException {
         if (opcode < 0 || opcode >= opcodeTable.length) {
             throw new IllegalOpcodeException("Opcode " + opcode + " is out of bounds");
         }
-        CodecRegistration c = opcodeTable[opcode];
+        Codec<?> c = opcodeTable[opcode];
         if (c == null) {
             throw new IllegalOpcodeException("Opcode " + opcode + " is not bound!");
         }

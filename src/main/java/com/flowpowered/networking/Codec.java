@@ -65,6 +65,24 @@ public interface Codec<T extends Message> {
         public <M extends Message> Codec<M> getCodec() {
             return (Codec<M>) codec;
         }
-        
+
+        @Override
+        public int hashCode() {
+            int hash = 5;
+            hash = 67 * hash + this.opcode;
+            return hash;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (obj == null)
+                return false;
+            if (getClass() != obj.getClass())
+                return false;
+            final CodecRegistration other = (CodecRegistration) obj;
+            if (this.opcode != other.opcode)
+                return false;
+            return true;
+        }
     }
 }

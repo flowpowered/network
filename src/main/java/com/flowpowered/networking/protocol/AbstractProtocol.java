@@ -46,7 +46,6 @@ public abstract class AbstractProtocol implements Protocol {
     /**
      * @param name
      * @param defaultPort
-     * @param maxPackets this is one more than the maximum packet id
      * @param logger
      */
     public AbstractProtocol(String name, int defaultPort, Logger logger) {
