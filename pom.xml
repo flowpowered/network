@@ -237,45 +237,6 @@
                     </archive>
                 </configuration>
             </plugin>
-            <!-- Dependency addition plugin -->
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-shade-plugin</artifactId>
-                <version>2.1</version>
-                <executions>
-                    <execution>
-                        <configuration>
-                            <minimizeJar>true</minimizeJar>
-                            <artifactSet>
-                                <includes>
-                                    <include>com.flowpowered:flow-networking</include>
-                                    <include>io.netty:*</include>
-                                    <include>org.slf4j:*</include>
-                                </includes>
-                            </artifactSet>
-                            <filters>
-                                <filter>
-                                    <artifact>*:*</artifact>
-                                    <excludes>
-                                        <exclude>lib/**</exclude>
-                                        <exclude>templates/**</exclude>
-                                        <exclude>META-INF/*.xml</exclude>
-                                        <exclude>META-INF/*.txt</exclude>
-                                        <exclude>**/LICENSE</exclude>
-                                        <exclude>**/NOTICE</exclude>
-                                        <exclude>**/DEPENDENCIES</exclude>
-                                        <exclude>**/*.java</exclude>
-                                    </excludes>
-                                </filter>
-                            </filters>
-                        </configuration>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>shade</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
             <!-- Coveralls reporting plugin  -->
             <plugin>
                 <groupId>org.eluder.coveralls</groupId>
