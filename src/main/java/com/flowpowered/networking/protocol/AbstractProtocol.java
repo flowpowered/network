@@ -36,21 +36,19 @@ import com.flowpowered.networking.MessageHandler;
  */
 public abstract class AbstractProtocol implements Protocol {
     private final String name;
-    private final int defaultPort;
     private final Logger logger;
 
-    public AbstractProtocol(String name, int defaultPort) {
-        this(name, defaultPort, LoggerFactory.getLogger("Protocol." + name));
+    public AbstractProtocol(String name) {
+        this(name, LoggerFactory.getLogger("Protocol." + name));
     }
 
     /**
      * @param name
-     * @param defaultPort
+     * @param maxPackets
      * @param logger
      */
-    public AbstractProtocol(String name, int defaultPort, Logger logger) {
+    public AbstractProtocol(String name, Logger logger) {
         this.name = name;
-        this.defaultPort = defaultPort;
         this.logger = logger;
     }
 
@@ -62,15 +60,6 @@ public abstract class AbstractProtocol implements Protocol {
     @Override
     public String getName() {
         return name;
-    }
-
-    /**
-     * The default port is the port used when autogenerating default bindings for this protocol and in the client when no port is given.
-     *
-     * @return The default port
-     */
-    public int getDefaultPort() {
-        return defaultPort;
     }
 
     /**

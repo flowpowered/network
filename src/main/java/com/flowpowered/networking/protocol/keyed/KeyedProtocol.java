@@ -41,22 +41,29 @@ import org.slf4j.Logger;
  * A {@code AbstractProtocol} stores {@link Message}s and their respective {@link Codec}s and {@link MessageHandler}s by key.
  */
 public abstract class KeyedProtocol extends AbstractProtocol {
+    private final int maxPackets;
     private final ConcurrentMap<String, CodecLookupService> codecLookup;
     private final ConcurrentMap<String, HandlerLookupService> handlerLookup;
 
-    public KeyedProtocol(String name, int defaultPort) {
-        super(name, defaultPort);
+    /**
+     * @param name
+     * @param maxPackets {@see CodecLookupService}
+     */
+    public KeyedProtocol(String name, int maxPackets) {
+        super(name);
+        this.maxPackets = maxPackets;
         codecLookup = new ConcurrentHashMap<>();
         handlerLookup = new ConcurrentHashMap<>();
     }
 
     /**
      * @param name
-     * @param defaultPort
+     * @param maxPackets {@see CodecLookupService}
      * @param logger
      */
-    public KeyedProtocol(String name, int defaultPort, Logger logger) {
-        super(name, defaultPort, logger);
+    public KeyedProtocol(String name, int maxPackets, Logger logger) {
+        super(name, logger);
+        this.maxPackets = maxPackets;
         codecLookup = new ConcurrentHashMap<>();
         handlerLookup = new ConcurrentHashMap<>();
     }
@@ -83,7 +90,7 @@ public abstract class KeyedProtocol extends AbstractProtocol {
         try {
             CodecLookupService codecLookup = this.codecLookup.get(key);
             if (codecLookup == null) {
-                codecLookup = new CodecLookupService();
+                codecLookup = new CodecLookupService(maxPackets);
                 this.codecLookup.put(key, codecLookup);
             }
             HandlerLookupService handlerLookup = this.handlerLookup.get(key);

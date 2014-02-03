@@ -46,6 +46,7 @@ public class CodecLookupService {
      * Lookup table for opcodes mapped to their codecs.
      */
     private final ConcurrentMap<Integer, Codec> opcodes;
+    private final Codec[] opcodeTable;
     /**
      * Stores the next opcode available.
      */
@@ -53,12 +54,22 @@ public class CodecLookupService {
      
     /**
      * The {@link CodecLookupService} stores the codecs available in the protocol. Codecs can be found using either the class of the message they represent or their message's opcode.
-     *
-     * @param size The maximum number of message types
+     * If the provided size is 0 then a map for the opcode->Codec mapping; otherwise, an array will be used.
+     * 
+     * @param size 0 for map, otherwise the array size
      */
-    public CodecLookupService() {
+    public CodecLookupService(int size) {
+        if (size < 0) {
+            throw new IllegalArgumentException("Size cannot be less than 0!");
+        }
         messages = new ConcurrentHashMap<>();
-        opcodes = new ConcurrentHashMap<>();
+        if (size == 0) {
+            opcodes = new ConcurrentHashMap<>();
+            opcodeTable = null;
+        } else {
+            opcodeTable = new Codec[size];
+            opcodes = null;
+        }
         nextId = new AtomicInteger(0);
     }
 
@@ -98,29 +109,51 @@ public class CodecLookupService {
             try {
                 do {
                     id = nextId.getAndIncrement();
-                } while (opcodes.get(id) != null);
+                } while (get(id) != null);
             } catch (IndexOutOfBoundsException ioobe) {
                 throw new IllegalStateException("Ran out of Ids!", ioobe);
             }
             opcode = id;
         }
-        if (opcodes.get(opcode) != null && opcodes.get(opcode).getClass() != codecClazz) {
+        Codec<?> previous = get(opcode);
+        if (previous != null && previous.getClass() != codecClazz) {
             throw new IllegalStateException("Trying to bind an opcode where one already exists. New: " + codecClazz.getSimpleName() + " Old: " + reg.getCodec().getClass().getSimpleName());
         }
+        put(opcode, codec);
         reg = new CodecRegistration(opcode, codec);
-        opcodes.put(opcode, codec);
         messages.put(messageClazz, reg);
         return reg;
+    }
+
+    private Codec<?> get(int opcode) {
+        if (opcodeTable != null && opcodes == null) {
+            return opcodeTable[opcode];
+        } else if (opcodes != null && opcodeTable == null) {
+            return opcodes.get(opcode);
+        } else {
+            throw new IllegalStateException("One and only one codec storage system must be in use!");
+        }
+    }
+
+    private void put(int opcode, Codec<?> codec) {
+        if (opcodeTable != null && opcodes == null) {
+            opcodeTable[opcode] = codec;
+        } else if (opcodes != null && opcodeTable == null) {
+            opcodes.put(opcode, codec);
+        } else {
+            throw new IllegalStateException("One and only one codec storage system must be in use!");
+        }
     }
 
     /**
      * Retrieves the {@link Codec} from the lookup table
      *
      * @param opcode The opcode which the codec uses
-     * @return The codec, null if not found.
+     * @return The codec
+     * @throws IllegalOpcodeException if the opcode is not bound 
      */
     public Codec<?> find(int opcode) throws IllegalOpcodeException {
-        Codec<?> c = opcodes.get(opcode);
+        Codec<?> c = get(opcode);
         if (c == null) {
             throw new IllegalOpcodeException("Opcode " + opcode + " is not bound!");
         }
