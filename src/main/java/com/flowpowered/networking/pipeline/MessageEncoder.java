@@ -57,8 +57,8 @@ public class MessageEncoder extends MessageToMessageEncoder<Message> {
         messageBuf = reg.getCodec().encode(messageBuf, message);
 
         
-        final ByteBuf headerBuf = ctx.alloc().buffer().retain();
-        protocol.writeHeader(headerBuf, reg, messageBuf);
+        ByteBuf headerBuf = ctx.alloc().buffer().retain();
+        headerBuf = protocol.writeHeader(headerBuf, reg, messageBuf);
         out.add(Unpooled.wrappedBuffer(headerBuf, messageBuf).retain());
     }
 }

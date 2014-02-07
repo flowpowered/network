@@ -61,6 +61,7 @@ public interface Protocol {
      * @param header the buffer which to write the header to
      * @param codec The codec the message was written with
      * @param data The data from the encoded message
+     * @return the header ByteBuf to use 
      */
-    void writeHeader(ByteBuf header, CodecRegistration codec, ByteBuf data);
+    ByteBuf writeHeader(ByteBuf header, CodecRegistration codec, ByteBuf data);
 }
