@@ -23,22 +23,10 @@
  */
 package com.flowpowered.networking;
 
-/**
- * Implementers of this class represent the data of a message to be sent.
- * There are a few rules that messages should follow:
- * <ul>
- * <li>All message fields should be immutable. This ensures thread-safety and makes it so Message objects can be safely stored</li>
- * <li>Message subclasses should override {@link #toString()}, {@link #equals(Object)} , and {@link #hashCode()}. </li>
- * <li>All fields in a Message should be protocol-primitive (can be written directly via ByteBuf methods or via a *single* ByteBufUtils method)</li>
- * </ul>
- */
-public interface Message {
-    @Override
-    public String toString();
-
-    @Override
-    public boolean equals(Object other);
-
-    @Override
-    public int hashCode();
+public interface AsyncableMessage extends Message {
+    /**
+     * This method may optionally be used to define if the message should be handled asynchronously or synchronously, when the option is available.
+     * It is completely up to the implementation how this is used.
+     */
+    public boolean isAsync();
 }

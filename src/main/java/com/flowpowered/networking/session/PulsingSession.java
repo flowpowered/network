@@ -27,6 +27,7 @@ import java.util.ArrayDeque;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
+import com.flowpowered.networking.AsyncableMessage;
 import io.netty.channel.Channel;
 
 import com.flowpowered.networking.Message;
@@ -124,11 +125,13 @@ public class PulsingSession extends BasicSession {
      */
     @Override
     public void messageReceived(Message message) {
-        if (message.isAsync()) {
-            super.messageReceived(message);
-        } else {
-            messageQueue.add(message);
+        if (message instanceof AsyncableMessage) {
+            if (((AsyncableMessage) message).isAsync()) {
+                super.messageReceived(message);
+                return;
+            }
         }
+        messageQueue.add(message);
     }
 
     /**
