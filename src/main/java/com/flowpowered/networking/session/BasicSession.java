@@ -26,7 +26,6 @@ package com.flowpowered.networking.session;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.util.Random;
-import java.util.concurrent.atomic.AtomicReference;
 
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;

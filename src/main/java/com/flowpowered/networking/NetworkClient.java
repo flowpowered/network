@@ -24,10 +24,9 @@
 package com.flowpowered.networking;
 
 import java.net.SocketAddress;
-import java.util.Map;
-import java.util.Map.Entry;
 
 import io.netty.bootstrap.Bootstrap;
+import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
@@ -49,7 +48,7 @@ public abstract class NetworkClient implements ConnectionManager {
             .handler(new BasicChannelInitializer(this));
     }
 
-    public Future<Void> connect(final SocketAddress remoteAdress) {
+    public ChannelFuture connect(final SocketAddress remoteAdress) {
         return bootstrap.connect(remoteAdress).addListener(new GenericFutureListener<Future<? super Void>>() {
             @Override
             public void operationComplete(Future<? super Void> f) throws Exception {

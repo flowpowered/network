@@ -24,7 +24,7 @@
 package com.flowpowered.networking;
 
 import io.netty.bootstrap.ServerBootstrap;
-import io.netty.channel.Channel;
+import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
@@ -52,8 +52,8 @@ public abstract class NetworkServer implements ConnectionManager {
             .childOption(ChannelOption.SO_KEEPALIVE, true);
     }
 
-    public void bind(SocketAddress address) {
-        Channel channel = bootstrap.bind(address).awaitUninterruptibly().channel();
+    public ChannelFuture bind(SocketAddress address) {
+        return bootstrap.bind(address);
     }
 
     @Override
