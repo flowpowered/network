@@ -117,7 +117,7 @@ public class CodecLookupService {
         }
         Codec<?> previous = get(opcode);
         if (previous != null && previous.getClass() != codecClazz) {
-            throw new IllegalStateException("Trying to bind an opcode where one already exists. New: " + codecClazz.getSimpleName() + " Old: " + reg.getCodec().getClass().getSimpleName());
+            throw new IllegalStateException("Trying to bind an opcode where one already exists. New: " + codecClazz.getSimpleName() + " Old: " + previous.getClass().getSimpleName());
         }
         put(opcode, codec);
         reg = new CodecRegistration(opcode, codec);
