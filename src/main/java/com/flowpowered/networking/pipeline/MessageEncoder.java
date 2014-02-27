@@ -53,12 +53,11 @@ public class MessageEncoder extends MessageToMessageEncoder<Message> {
         if (reg == null) {
             throw new Exception("Unknown message type: " + clazz + ".");
         }
-        ByteBuf messageBuf = ctx.alloc().buffer().retain();
+        ByteBuf messageBuf = ctx.alloc().buffer();
         messageBuf = reg.getCodec().encode(messageBuf, message);
 
-        
-        ByteBuf headerBuf = ctx.alloc().buffer().retain();
+        ByteBuf headerBuf = ctx.alloc().buffer();
         headerBuf = protocol.writeHeader(headerBuf, reg, messageBuf);
-        out.add(Unpooled.wrappedBuffer(headerBuf, messageBuf).retain());
+        out.add(Unpooled.wrappedBuffer(headerBuf, messageBuf));
     }
 }
