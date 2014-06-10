@@ -45,10 +45,10 @@ public class MessageProcessorEncoder extends MessageToMessageEncoder<ByteBuf> {
     protected void encode(ChannelHandlerContext ctx, final ByteBuf buf, List<Object> out) throws Exception {
         final MessageProcessor processor = getProcessor();
         if (processor == null) {
-            out.add(buf.readBytes(buf.readableBytes()).retain());
+            out.add(buf.readBytes(buf.readableBytes()));
             return;
         }
-        ByteBuf toAdd = ctx.alloc().buffer().retain();
+        ByteBuf toAdd = ctx.alloc().buffer();
         toAdd = processor.processOutbound(ctx, buf, toAdd);
         out.add(toAdd);
     }

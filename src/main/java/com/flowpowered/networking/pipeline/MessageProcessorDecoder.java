@@ -42,12 +42,11 @@ public class MessageProcessorDecoder extends ByteToMessageDecoder {
     protected void decode(ChannelHandlerContext ctx, ByteBuf buf, List<Object> frames) throws Exception {
         MessageProcessor processor = getProcessor();
         if (processor == null) {
-            frames.add(buf.readBytes(buf.readableBytes()).retain());
+            frames.add(buf.readBytes(buf.readableBytes()));
             return;
         }
         // Eventually, we will run out of bytes and a ReplayableError will be called
         ByteBuf liveBuffer = ctx.alloc().buffer();
-        liveBuffer.retain();
         liveBuffer = processor.processInbound(ctx, buf, liveBuffer);
         frames.add(liveBuffer);
     }
