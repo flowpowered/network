@@ -125,7 +125,7 @@ public class CodecLookupService {
         return reg;
     }
 
-    private Codec<?> get(int opcode) {
+    private Codec<?> get(int opcode) throws ArrayIndexOutOfBoundsException {
         if (opcodeTable != null && opcodes == null) {
             return opcodeTable[opcode];
         } else if (opcodes != null && opcodeTable == null) {
@@ -153,11 +153,15 @@ public class CodecLookupService {
      * @throws IllegalOpcodeException if the opcode is not bound 
      */
     public Codec<?> find(int opcode) throws IllegalOpcodeException {
-        Codec<?> c = get(opcode);
-        if (c == null) {
+        try {
+            Codec<?> c = get(opcode);
+            if (c == null) {
+                throw new NullPointerException();
+            }
+            return c;
+        } catch (ArrayIndexOutOfBoundsException | NullPointerException e) {
             throw new IllegalOpcodeException("Opcode " + opcode + " is not bound!");
         }
-        return c;
     }
 
     /**
