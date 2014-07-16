@@ -48,13 +48,14 @@ public abstract class NetworkClient implements ConnectionManager {
             .handler(new BasicChannelInitializer(this));
     }
 
-    public ChannelFuture connect(final SocketAddress remoteAdress) {
-        return bootstrap.connect(remoteAdress).addListener(new GenericFutureListener<Future<? super Void>>() {
+    public ChannelFuture connect(final SocketAddress address) {
+        return bootstrap.connect(address).addListener(new GenericFutureListener<Future<? super Void>>() {
             @Override
             public void operationComplete(Future<? super Void> f) throws Exception {
-                Throwable cause = f.cause();
-                if (cause != null || f.isCancelled()) {
-                    onConnectFailure();
+                if (f.isSuccess()) {
+                    onConnectSuccess(address);
+                } else {
+                    onConnectFailure(address, f.cause());
                 }
             }
         });
@@ -70,7 +71,19 @@ public abstract class NetworkClient implements ConnectionManager {
         bootstrap.option(option, value);
     }
 
-    public void onConnectFailure() {
+    /**
+     * Called when a connection has successfully been made.
+     * @param address The address we succesfully connected to.
+     */
+    public void onConnectSuccess(SocketAddress address) {
+    }
+
+    /**
+     * Called when a connection cannot be made.
+     * @param address The address that we attempted to connect to.
+     * @param t The cause of why the connection couldn't be made. This can be null.
+     */
+    public void onConnectFailure(SocketAddress address, Throwable t) {
     }
 
     @Override
