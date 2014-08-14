@@ -15,7 +15,7 @@
     <parent>
         <groupId>org.sonatype.oss</groupId>
         <artifactId>oss-parent</artifactId>
-        <version>7</version>
+        <version>9</version>
     </parent>
 
     <!-- Build properties -->
@@ -30,7 +30,7 @@
     <licenses>
         <license>
             <name>MIT License</name>
-            <url>http://www.tldrlegal.com/license/mit-license</url>
+            <url>https://tldrlegal.com/license/mit-license</url>
             <distribution>repo</distribution>
         </license>
     </licenses>
@@ -38,7 +38,7 @@
     <!-- Organization information -->
     <organization>
         <name>Spout LLC</name>
-        <url>http://www.spout.org</url>
+        <url>https://spout.org</url>
     </organization>
 
     <!-- Project developers -->
@@ -82,8 +82,12 @@
     <!-- Dependency repositories -->
     <repositories>
         <repository>
-            <id>sonatype-nexus</id>
-            <url>https://oss.sonatype.org/content/repositories/public</url>
+            <id>sonatype-nexus-releases</id>
+            <url>https://oss.sonatype.org/content/repositories/releases</url>
+        </repository>
+        <repository>
+            <id>sonatype-nexus-snapshots</id>
+            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
             <snapshots>
                 <enabled>true</enabled>
                 <updatePolicy>always</updatePolicy>
@@ -94,8 +98,12 @@
     <!-- Build plugin repositories -->
     <pluginRepositories>
         <pluginRepository>
-            <id>sonatype-nexus</id>
-            <url>https://oss.sonatype.org/content/repositories/public</url>
+            <id>sonatype-nexus-releases</id>
+            <url>https://oss.sonatype.org/content/repositories/releases</url>
+        </pluginRepository>
+        <pluginRepository>
+            <id>sonatype-nexus-snapshots</id>
+            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
             <snapshots>
                 <enabled>true</enabled>
                 <updatePolicy>always</updatePolicy>
@@ -105,16 +113,17 @@
 
     <!-- Project dependencies -->
     <dependencies>
-        <!-- Include in final JAR -->
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-api</artifactId>
-            <version>1.7.5</version>
-        </dependency>
+        <!-- Transitive -->
         <dependency>
             <groupId>io.netty</groupId>
             <artifactId>netty-all</artifactId>
             <version>4.0.14.Final</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <version>1.7.7</version>
             <scope>compile</scope>
         </dependency>
         <!-- Testing only -->
@@ -139,13 +148,13 @@
         <dependency>
             <groupId>org.powermock</groupId>
             <artifactId>powermock-api-mockito</artifactId>
-            <version>1.5.1</version>
+            <version>1.5.5</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.powermock</groupId>
             <artifactId>powermock-module-junit4</artifactId>
-            <version>1.5.1</version>
+            <version>1.5.5</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
@@ -226,22 +235,32 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>
-                <version>2.4</version>
+                <version>2.5</version>
                 <configuration>
                     <archive>
                         <manifestEntries>
                             <Specification-Title>${project.name}</Specification-Title>
                             <Specification-Version>${project.version}+${ciSystem}-b${buildNumber}.git-${commit}</Specification-Version>
-                            <Specification-Vendor>${project.organization.name}</Specification-Vendor>
+                            <Specification-Vendor>${project.organization.name} - ${project.organization.url}</Specification-Vendor>
                         </manifestEntries>
                     </archive>
+                </configuration>
+            </plugin>
+            <!-- Javadoc creation plugin -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <version>2.9.1</version>
+                <configuration>
+                    <author>false</author>
+                    <version>false</version>
                 </configuration>
             </plugin>
             <!-- Coveralls reporting plugin  -->
             <plugin>
                 <groupId>org.eluder.coveralls</groupId>
                 <artifactId>coveralls-maven-plugin</artifactId>
-                <version>2.1.0</version>
+                <version>2.2.0</version>
             </plugin>
             <!-- Cobertura test coverage plugin -->
             <plugin>
