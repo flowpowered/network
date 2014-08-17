@@ -77,8 +77,8 @@ public class ByteBufUtils {
         byte in;
         while (true) {
             in = buf.readByte();
-            out |= (in & 0x7F) << (bytes * 7);
-            if (bytes > 32) {
+            out |= (in & 0x7F) << (bytes++ * 7);
+            if (bytes > 5) {
                 throw new IOException("Attempt to read int bigger than allowed for a varint!");
             }
             if ((in & 0x80) != 0x80) {
