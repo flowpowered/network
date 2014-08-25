@@ -35,7 +35,7 @@ import com.flowpowered.networking.exception.UnknownPacketException;
 import com.flowpowered.networking.protocol.Protocol;
 
 /**
- * A {@link PreprocessReplayingDecoder} which decodes {@link ByteBuf}s into Common {@link Message}s.
+ * A {@link ReplayingDecoder} which decodes {@link ByteBuf}s into {@link Message}s.
  */
 public class MessageDecoder extends ReplayingDecoder<ByteBuf> {
     private final MessageHandler messageHandler;
@@ -45,7 +45,7 @@ public class MessageDecoder extends ReplayingDecoder<ByteBuf> {
     }
 
     @Override
-    protected void decode(ChannelHandlerContext ctx, ByteBuf buf ,List<Object> out) throws Exception {
+    protected void decode(ChannelHandlerContext ctx, ByteBuf buf, List<Object> out) throws Exception {
         Protocol protocol = messageHandler.getSession().getProtocol();
         Codec<?> codec = null;
         try {
@@ -63,6 +63,6 @@ public class MessageDecoder extends ReplayingDecoder<ByteBuf> {
             throw new UnsupportedOperationException("Protocol#readHeader cannot return null!");
         }
         Message decoded = codec.decode(buf);
-        ctx.fireChannelRead(decoded);
+        out.add(decoded);
     }
 }

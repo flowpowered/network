@@ -31,6 +31,7 @@ import com.flowpowered.networking.AsyncableMessage;
 import io.netty.channel.Channel;
 
 import com.flowpowered.networking.Message;
+import com.flowpowered.networking.exception.ChannelClosedException;
 import com.flowpowered.networking.protocol.AbstractProtocol;
 
 /**
@@ -92,11 +93,11 @@ public class PulsingSession extends BasicSession {
     }
 
     @Override
-    public void send(Message message) {
+    public void send(Message message) throws ChannelClosedException {
         send(SendType.QUEUE, message);
     }
 
-    public void send(SendType type, Message message) {
+    public void send(SendType type, Message message) throws ChannelClosedException {
         if (message == null) {
             return;
         }

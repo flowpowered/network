@@ -175,4 +175,9 @@ public class CodecLookupService {
     public <M extends Message> CodecRegistration find(Class<M> clazz) {
         return messages.get(clazz);
     }
+
+    @Override
+    public String toString() {
+        return "CodecLookupService{" + "messages=" + messages + ", opcodes=" + opcodes + '}';
+    }
 }

@@ -27,18 +27,16 @@ import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.util.Random;
 
-import io.netty.channel.Channel;
-import io.netty.channel.ChannelFuture;
-import io.netty.util.concurrent.Future;
-import io.netty.util.concurrent.GenericFutureListener;
-
-import io.netty.channel.ChannelOption;
-
 import com.flowpowered.networking.Message;
 import com.flowpowered.networking.MessageHandler;
+import com.flowpowered.networking.exception.ChannelClosedException;
 import com.flowpowered.networking.processor.MessageProcessor;
 import com.flowpowered.networking.protocol.AbstractProtocol;
-
+import io.netty.channel.Channel;
+import io.netty.channel.ChannelFuture;
+import io.netty.channel.ChannelOption;
+import io.netty.util.concurrent.Future;
+import io.netty.util.concurrent.GenericFutureListener;
 import org.slf4j.Logger;
 
 /**
@@ -86,9 +84,9 @@ public class BasicSession implements Session {
         }
     }
 
-    public ChannelFuture sendWithFuture(Message message) {
+    public ChannelFuture sendWithFuture(Message message) throws ChannelClosedException {
         if (!channel.isActive()) {
-            throw new IllegalStateException("Trying to send a message when a session is inactive!");
+            throw new ChannelClosedException("Trying to send a message when a session is inactive!");
         }
         return channel.writeAndFlush(message).addListener(new GenericFutureListener<Future<? super Void>>() {
             @Override
@@ -101,12 +99,12 @@ public class BasicSession implements Session {
     }
 
     @Override
-    public void send(Message message) {
+    public void send(Message message) throws ChannelClosedException {
         sendWithFuture(message);
     }
 
     @Override
-    public void sendAll(Message... messages) {
+    public void sendAll(Message... messages) throws ChannelClosedException {
         for (Message msg : messages) {
             send(msg);
         }
@@ -166,13 +164,6 @@ public class BasicSession implements Session {
      */
     public boolean isActive() {
         return channel.isActive();
-    }
-
-    @Override
-    public void validate(Channel c) throws IllegalStateException {
-        if (c != this.channel) {
-            throw new IllegalStateException("Unknown channel for session!");
-        }
     }
 
     public Channel getChannel() {

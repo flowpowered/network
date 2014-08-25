@@ -23,9 +23,9 @@
  */
 package com.flowpowered.networking.session;
 
-import io.netty.channel.Channel;
 
 import com.flowpowered.networking.Message;
+import com.flowpowered.networking.exception.ChannelClosedException;
 import com.flowpowered.networking.processor.MessageProcessor;
 import com.flowpowered.networking.protocol.Protocol;
 
@@ -58,14 +58,14 @@ public interface Session {
      *
      * @param message The message.
      */
-    void send(Message message);
+    void send(Message message) throws ChannelClosedException;
 
     /**
      * Sends any amount of messages to the client.
      *
      * @param messages the messages to send to the client
      */
-    void sendAll(Message... messages);
+    void sendAll(Message... messages) throws ChannelClosedException;
 
     /**
      * Closes the session.
@@ -91,14 +91,6 @@ public interface Session {
      * @param throwable 
      */
     void onInboundThrowable(Throwable throwable);
-
-    /**
-     * Validates that {@code c} is the channel of the session.  The channel of a session never changes.
-     *
-     * @param c the channel to check
-     * @throws IllegalStateException if {@code c} is not the channel of the session
-     */
-    void validate(Channel c) throws IllegalStateException;
 
     Logger getLogger();
 }

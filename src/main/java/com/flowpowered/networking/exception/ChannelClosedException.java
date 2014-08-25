@@ -21,28 +21,16 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.flowpowered.networking.service;
+package com.flowpowered.networking.exception;
 
-import com.flowpowered.networking.MessageHandler;
-import com.flowpowered.networking.Message;
-import java.util.HashMap;
-import java.util.Map;
+public class ChannelClosedException extends RuntimeException {
+    private static final long serialVersionUID = 1L;
 
-public class HandlerLookupService {
-    private final Map<Class<? extends Message>, MessageHandler<?, ?>> handlers = new HashMap<>();
-
-    public <M extends Message, H extends MessageHandler<?, ? super M>> void bind(Class<M> clazz, Class<H> handlerClass) throws InstantiationException, IllegalAccessException {
-        MessageHandler<?, ? super M> handler = handlerClass.newInstance();
-        handlers.put(clazz, handler);
+    public ChannelClosedException() {
     }
 
-    @SuppressWarnings("unchecked")
-    public <M extends Message> MessageHandler<?, M> find(Class<M> clazz) {
-        return (MessageHandler<?, M>) handlers.get(clazz);
+    public ChannelClosedException(String message) {
+        super(message);
     }
 
-    @Override
-    public String toString() {
-        return "HandlerLookupService{" + "handlers=" + handlers + '}';
-    }
 }
