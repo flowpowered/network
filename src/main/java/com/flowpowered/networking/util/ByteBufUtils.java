@@ -117,7 +117,7 @@ public class ByteBufUtils {
      * @throws java.io.IOException If the reading fails
      */
     public static long readVarLong(ByteBuf buf) throws IOException {
-        int out = 0;
+        long out = 0;
         int bytes = 0;
         byte in;
         while (true) {
