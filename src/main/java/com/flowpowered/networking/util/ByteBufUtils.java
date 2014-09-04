@@ -95,9 +95,54 @@ public class ByteBufUtils {
      * @param value The integer value to write
      */
     public static void writeVarInt(ByteBuf buf, int value) {
-        int part;
+        byte part;
         while (true) {
-            part = value & 0x7F;
+            part = (byte) (value & 0x7F);
+            value >>>= 7;
+            if (value != 0) {
+                part |= 0x80;
+            }
+            buf.writeByte(part);
+            if (value == 0) {
+                break;
+            }
+        }
+    }
+
+    /**
+     * Reads an integer written into the byte buffer as one of various bit sizes.
+     *
+     * @param buf The byte buffer to read from
+     * @return The read integer
+     * @throws java.io.IOException If the reading fails
+     */
+    public static long readVarLong(ByteBuf buf) throws IOException {
+        int out = 0;
+        int bytes = 0;
+        byte in;
+        while (true) {
+            in = buf.readByte();
+            out |= (in & 0x7F) << (bytes++ * 7);
+            if (bytes > 10) {
+                throw new IOException("Attempt to read long bigger than allowed for a varlong!");
+            }
+            if ((in & 0x80) != 0x80) {
+                break;
+            }
+        }
+        return out;
+    }
+
+    /**
+     * Writes an integer into the byte buffer using the least possible amount of bits.
+     *
+     * @param buf The byte buffer to write too
+     * @param value The long value to write
+     */
+    public static void writeVarLong(ByteBuf buf, long value) {
+        byte part;
+        while (true) {
+            part = (byte) (value & 0x7F);
             value >>>= 7;
             if (value != 0) {
                 part |= 0x80;
