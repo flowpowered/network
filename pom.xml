@@ -1,15 +1,16 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <!-- Project information -->
-    <name>Flow Networking</name>
+    <name>Flow Network</name>
     <groupId>com.flowpowered</groupId>
-    <artifactId>flow-networking</artifactId>
+    <artifactId>flow-network</artifactId>
     <version>1.0.0-SNAPSHOT</version>
     <packaging>jar</packaging>
     <inceptionYear>2013</inceptionYear>
-    <url>http://flowpowered.com</url>
-    <description>Networking library for the Flow collection.</description>
+    <url>https://flowpowered.com/network</url>
+    <description>Network library for the Flow collection.</description>
 
     <!-- Parent information -->
     <parent>
@@ -24,25 +25,31 @@
         <buildNumber>0</buildNumber>
         <ciSystem>unknown</ciSystem>
         <commit>unknown</commit>
+        <additionalparam>-Xdoclint:none</additionalparam>
     </properties>
 
     <!-- License information -->
     <licenses>
         <license>
             <name>MIT License</name>
-            <url>https://tldrlegal.com/license/mit-license</url>
+            <url>https://tldrlegal.com/l/mit</url>
             <distribution>repo</distribution>
         </license>
     </licenses>
 
     <!-- Organization information -->
     <organization>
-        <name>Spout LLC</name>
-        <url>https://spout.org</url>
+        <name>Flow Powered</name>
+        <url>https://flowpowered.com</url>
     </organization>
 
     <!-- Project developers -->
     <developers>
+        <developer>
+            <id>DDoS</id>
+            <name>Aleksi Sapon</name>
+            <email>qctechs@gmail.com</email>
+        </developer>
         <developer>
             <id>kitskub</id>
             <name>Jack Huey</name>
@@ -54,7 +61,7 @@
             <email>wolf480@interia.pl</email>
         </developer>
         <developer>
-            <id>Wulfspider</id>
+            <id>lukespragg</id>
             <name>Luke Spragg</name>
             <email>the@wulf.im</email>
         </developer>
@@ -62,54 +69,22 @@
 
     <!-- Source code access -->
     <scm>
-        <connection>scm:git:git://github.com/flow/flow-networking.git</connection>
-        <developerConnection>scm:git:ssh://git@github.com:flow/flow-networking.git</developerConnection>
-        <url>https://github.com/flow/flow-networking</url>
+        <connection>scm:git:git://github.com/flow/network.git</connection>
+        <developerConnection>scm:git:ssh://git@github.com:flow/flow-network.git</developerConnection>
+        <url>https://github.com/flow/network</url>
     </scm>
 
     <!-- Continuous integration -->
     <ciManagement>
         <system>travis</system>
-        <url>https://travis-ci.org/flow/flow-networking</url>
+        <url>https://travis-ci.org/flow/network</url>
     </ciManagement>
 
     <!-- Issue management -->
     <issueManagement>
         <system>github</system>
-        <url>https://github.com/flow/flow-networking/issues</url>
+        <url>https://github.com/flow/network/issues</url>
     </issueManagement>
-
-    <!-- Dependency repositories -->
-    <repositories>
-        <repository>
-            <id>sonatype-nexus-releases</id>
-            <url>https://oss.sonatype.org/content/repositories/releases</url>
-        </repository>
-        <repository>
-            <id>sonatype-nexus-snapshots</id>
-            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
-            <snapshots>
-                <enabled>true</enabled>
-                <updatePolicy>always</updatePolicy>
-            </snapshots>
-        </repository>
-    </repositories>
-
-    <!-- Build plugin repositories -->
-    <pluginRepositories>
-        <pluginRepository>
-            <id>sonatype-nexus-releases</id>
-            <url>https://oss.sonatype.org/content/repositories/releases</url>
-        </pluginRepository>
-        <pluginRepository>
-            <id>sonatype-nexus-snapshots</id>
-            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
-            <snapshots>
-                <enabled>true</enabled>
-                <updatePolicy>always</updatePolicy>
-            </snapshots>
-        </pluginRepository>
-    </pluginRepositories>
 
     <!-- Project dependencies -->
     <dependencies>
@@ -117,20 +92,20 @@
         <dependency>
             <groupId>io.netty</groupId>
             <artifactId>netty-all</artifactId>
-            <version>4.0.21.Final</version>
+            <version>4.0.33.Final</version>
             <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
-            <version>1.7.7</version>
+            <version>1.7.13</version>
             <scope>compile</scope>
         </dependency>
         <!-- Testing only -->
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
-            <version>4.11</version>
+            <version>4.12</version>
             <scope>test</scope>
             <exclusions>
                 <exclusion>
@@ -148,13 +123,13 @@
         <dependency>
             <groupId>org.powermock</groupId>
             <artifactId>powermock-api-mockito</artifactId>
-            <version>1.5.5</version>
+            <version>1.6.4</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.powermock</groupId>
             <artifactId>powermock-module-junit4</artifactId>
-            <version>1.5.5</version>
+            <version>1.6.4</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
@@ -219,7 +194,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.1</version>
+                <version>3.3</version>
                 <configuration>
                     <source>1.7</source>
                     <target>1.7</target>
@@ -235,7 +210,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>
-                <version>2.5</version>
+                <version>2.6</version>
                 <configuration>
                     <archive>
                         <manifestEntries>
@@ -250,7 +225,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
-                <version>2.9.1</version>
+                <version>2.10.3</version>
                 <configuration>
                     <author>false</author>
                     <version>false</version>
@@ -260,13 +235,13 @@
             <plugin>
                 <groupId>org.eluder.coveralls</groupId>
                 <artifactId>coveralls-maven-plugin</artifactId>
-                <version>2.2.0</version>
+                <version>4.1.0</version>
             </plugin>
             <!-- Cobertura test coverage plugin -->
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>cobertura-maven-plugin</artifactId>
-                <version>2.6</version>
+                <version>2.7</version>
                 <configuration>
                     <format>xml</format>
                     <maxmem>256m</maxmem>
