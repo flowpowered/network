@@ -1,7 +1,7 @@
 /*
- * This file is part of Flow Networking, licensed under the MIT License (MIT).
+ * This file is part of Flow Network, licensed under the MIT License (MIT).
  *
- * Copyright (c) 2013 Spout LLC <https://spout.org/>
+ * Copyright (c) 2013 Flow Powered <https://flowpowered.com/>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -21,19 +21,19 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.flowpowered.networking.protocol.keyed;
+package com.flowpowered.network.protocol.keyed;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
-import com.flowpowered.networking.Codec;
-import com.flowpowered.networking.Codec.CodecRegistration;
-import com.flowpowered.networking.Message;
-import com.flowpowered.networking.MessageHandler;
-import com.flowpowered.networking.protocol.AbstractProtocol;
-import com.flowpowered.networking.service.CodecLookupService;
-import com.flowpowered.networking.service.HandlerLookupService;
+import com.flowpowered.network.Codec;
+import com.flowpowered.network.Codec.CodecRegistration;
+import com.flowpowered.network.Message;
+import com.flowpowered.network.MessageHandler;
+import com.flowpowered.network.protocol.AbstractProtocol;
+import com.flowpowered.network.service.CodecLookupService;
+import com.flowpowered.network.service.HandlerLookupService;
 
 import org.slf4j.Logger;
 

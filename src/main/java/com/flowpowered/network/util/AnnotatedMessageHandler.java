@@ -1,7 +1,7 @@
 /*
- * This file is part of Flow Networking, licensed under the MIT License (MIT).
+ * This file is part of Flow Network, licensed under the MIT License (MIT).
  *
- * Copyright (c) 2013 Spout LLC <https://spout.org/>
+ * Copyright (c) 2013 Flow Powered <https://flowpowered.com/>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.flowpowered.networking.util;
+package com.flowpowered.network.util;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -32,13 +32,13 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.flowpowered.networking.Message;
+import com.flowpowered.network.Message;
 
 /**
- * A class for handling messages with annotated methods referred to as handles. The methods need to be annotated with {@link com.flowpowered.networking.util.AnnotatedMessageHandler.Handle} and should only
- * have one parameter, the message, which needs to be a subclass of {@link com.flowpowered.networking.Message}. These should be instance methods inside any class. When creating the annotated message
+ * A class for handling messages with annotated methods referred to as handles. The methods need to be annotated with {@link com.flowpowered.network.util.AnnotatedMessageHandler.Handle} and should only
+ * have one parameter, the message, which needs to be a subclass of {@link com.flowpowered.network.Message}. These should be instance methods inside any class. When creating the annotated message
  * handler, an instance of the class containing the method is passed to the constructor. Handle methods will be called from this instance when handling messages. To handle a message, simply call
- * {@link #handle(com.flowpowered.networking.Message)} with the said message as a parameter. The thread calling {@link #handle(com.flowpowered.networking.Message)} is the same that calls the handle
+ * {@link #handle(com.flowpowered.network.Message)} with the said message as a parameter. The thread calling {@link #handle(com.flowpowered.network.Message)} is the same that calls the handle
  * method.
  */
 public class AnnotatedMessageHandler {

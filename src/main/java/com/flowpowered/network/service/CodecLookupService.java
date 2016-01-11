@@ -1,7 +1,7 @@
 /*
- * This file is part of Flow Networking, licensed under the MIT License (MIT).
+ * This file is part of Flow Network, licensed under the MIT License (MIT).
  *
- * Copyright (c) 2013 Spout LLC <https://spout.org/>
+ * Copyright (c) 2013 Flow Powered <https://flowpowered.com/>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.flowpowered.networking.service;
+package com.flowpowered.network.service;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -29,10 +29,10 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import com.flowpowered.networking.Codec;
-import com.flowpowered.networking.Codec.CodecRegistration;
-import com.flowpowered.networking.Message;
-import com.flowpowered.networking.exception.IllegalOpcodeException;
+import com.flowpowered.network.Codec;
+import com.flowpowered.network.Codec.CodecRegistration;
+import com.flowpowered.network.Message;
+import com.flowpowered.network.exception.IllegalOpcodeException;
 
 /**
  * A class used to lookup message codecs.

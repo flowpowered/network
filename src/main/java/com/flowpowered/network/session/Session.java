@@ -1,7 +1,7 @@
 /*
- * This file is part of Flow Networking, licensed under the MIT License (MIT).
+ * This file is part of Flow Network, licensed under the MIT License (MIT).
  *
- * Copyright (c) 2013 Spout LLC <https://spout.org/>
+ * Copyright (c) 2013 Flow Powered <https://flowpowered.com/>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -21,13 +21,13 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.flowpowered.networking.session;
+package com.flowpowered.network.session;
 
 
-import com.flowpowered.networking.Message;
-import com.flowpowered.networking.exception.ChannelClosedException;
-import com.flowpowered.networking.processor.MessageProcessor;
-import com.flowpowered.networking.protocol.Protocol;
+import com.flowpowered.network.Message;
+import com.flowpowered.network.exception.ChannelClosedException;
+import com.flowpowered.network.processor.MessageProcessor;
+import com.flowpowered.network.protocol.Protocol;
 
 import org.slf4j.Logger;
 
