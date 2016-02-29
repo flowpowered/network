@@ -51,7 +51,7 @@ If you're using [Maven](https://maven.apache.org/download.html) to manage projec
     <dependency>
         <groupId>com.flowpowered</groupId>
         <artifactId>flow-network</artifactId>
-        <version>1.0.0-SNAPSHOT</version>
+        <version>1.0.0</version>
     </dependency>
 
 If you're using [Gradle](https://www.gradle.org/) to manage project dependencies, simply include the following in your `build.gradle` file:
@@ -60,7 +60,7 @@ If you're using [Gradle](https://www.gradle.org/) to manage project dependencies
         mavenCentral()
     }
     dependencies {
-        compile 'com.flowpowered:flow-network:1.0.0-SNAPSHOT'
+        compile 'com.flowpowered:flow-network:1.0.0'
     }
 
 If you plan on using snapshots and do not already have the snapshot repo in your repository list, you will need to add this as well:
